@@ -203,9 +203,9 @@ set(GSdxHeaders
     Renderers/OpenGL/GSUniformBufferOGL.h
     Renderers/OpenGL/GSVertexArrayOGL.h
     Renderers/OpenCL/GSRendererCL.h
-    Renderers/VK/GSDeviceVK.h
-    Renderers/VK/GSRendererVK.h
-    Renderers/VK/GSTextureVK.h
+    Renderers/Vulkan/GSDeviceVK.h
+    Renderers/Vulkan/GSRendererVK.h
+    Renderers/Vulkan/GSTextureVK.h
     Window/GSCaptureDlg.h
     Window/GSDialog.h
     Window/GSSetting.h
