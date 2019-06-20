@@ -417,7 +417,7 @@ static int _GSopen(void** dsp, const char* title, GSRendererType renderer, int t
 				s_renderer_type = " HW";
 				break;
 			case GSRendererType::VK:
-				s_gs = new (GSRenderer*)new GSRendererVK();
+				s_gs = (GSRenderer*)new GSRendererVK();
 				s_renderer_type = " HW";
 				break;
 			case GSRendererType::DX1011_SW:
