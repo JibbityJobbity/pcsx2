@@ -24,14 +24,16 @@
 #include <X11/Xlib.h>
 #include <GL/glx.h>
 #include <vulkan/vulkan.h>
+#include <vector>
 
-class GSWndVK final : public GSWnd
+class GSWndVK : public GSWnd
 {
 protected:
 	Window		m_NativeWindow;
 	Display* 	m_NativeDisplay;
 	bool		m_has_late_vsync;
 
+	uint32_t m_vk_graphicsFamily = -1;
 	VkInstance	m_vk_Instance;
 	VkPhysicalDevice	m_vk_PhysicalDevice = VK_NULL_HANDLE;
 	VkDevice	m_vk_LogicalDevice = VK_NULL_HANDLE;
@@ -43,14 +45,15 @@ public:
 	virtual ~GSWndVK();
 
 	bool Create(const std::string& title, int w, int h);
-};
-
-struct QueueFamilyIndices {
-	std::optional<uint32_t> graphicsFamily;
-
-	bool isComplete() {
-		return graphicsFamily.has_value();
-	}	
+	bool Attach(void* handle, bool managed = true);
+	void Detach();
+	void* GetDisplay();
+	void* GetHandle();
+	GSVector4i GetClientRect();
+	bool SetWindowText(const char* title);
+	void Show();
+	void Hide();
+	void HideFrame();
 };
 
 #endif
