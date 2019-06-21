@@ -84,7 +84,7 @@ void GSWndVK::InitVulkan()
 		}
 	}
 	if (m_vk_PhysicalDevice == VK_NULL_HANDLE) {
-		fprintf(stderr, "Vulkan: Couldn't find a suitable physical device\n");
+		fprintf(stderr, "Vulkan: Detected physical devices but none were suitable\n");
 		throw GSDXError();
 	}
 	VkPhysicalDeviceProperties deviceProperties;
