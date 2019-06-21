@@ -268,6 +268,7 @@ set(GSdxFinalSources
 set(GSdxFinalLibs
     ${X11_LIBRARIES}
     ${OPENGL_LIBRARIES}
+    ${Vulkan_LIBRARIES}
     ${GTK2_LIBRARIES}
     ${LIBC_LIBRARIES}
     ${PNG_LIBRARIES}
