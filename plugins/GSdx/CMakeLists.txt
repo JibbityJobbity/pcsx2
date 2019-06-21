@@ -249,11 +249,13 @@ else()
         Window/GSLinuxDialog.cpp
         Window/GSWndOGL.cpp
         Window/GSWndEGL.cpp
+        Window/GSWndVK.cpp
         )
 
     LIST(APPEND GSdxHeaders
         Window/GSWndEGL.h
         Window/GSWndOGL.h
+        Window/GSWndVK.h
         )
 endif()
 
