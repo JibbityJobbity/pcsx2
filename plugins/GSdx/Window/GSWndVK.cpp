@@ -43,17 +43,17 @@ void GSWndVK::InitVulkan()
 	appInfo.engineVersion = VK_MAKE_VERSION(0, 1, 0);
 	appInfo.apiVersion = VK_API_VERSION_1_1;
 
-	VkInstanceCreateInfo createInfo = {};
-	createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-	createInfo.pApplicationInfo = &appInfo;
+	VkInstanceCreateInfo instanceCreateInfo = {};
+	instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+	instanceCreateInfo.pApplicationInfo = &appInfo;
 	std::vector<const char*> extensions = {
-		"VK_KHR_surface",
-		"VK_KHR_xlib_surface"
+		VK_KHR_SURFACE_EXTENSION_NAME,
+		VK_KHR_XLIB_SURFACE_EXTENSION_NAME
 	};
-	createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
-	createInfo.ppEnabledExtensionNames = extensions.data();
-	createInfo.enabledLayerCount = 0;
-	VkResult result = vkCreateInstance(&createInfo, nullptr, &m_vk_Instance);
+	instanceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+	instanceCreateInfo.ppEnabledExtensionNames = extensions.data();
+	instanceCreateInfo.enabledLayerCount = 0;
+	VkResult result = vkCreateInstance(&instanceCreateInfo, nullptr, &m_vk_Instance);
 	if (result != VK_SUCCESS) {
 		fprintf(stderr, "Vulkan: Couldn't create instance\n");
 		throw GSDXError();
@@ -84,10 +84,15 @@ void GSWndVK::InitVulkan()
 	int i = 0;
 	bool queueIndicesFound = false;
 	for (const auto& queueFamily : queueFamilies) {
+		VkBool32 presentSupport = false;
+		vkGetPhysicalDeviceSurfaceSupportKHR(m_vk_PhysicalDevice, i, m_vk_Surface, &presentSupport);
 		if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
 			m_vk_graphicsFamily = i;
 		}
-		if (m_vk_graphicsFamily != -1) {
+		if (queueFamily.queueCount > 0 && presentSupport) {
+			m_vk_presentFamily = i;
+		}
+		if (m_vk_graphicsFamily != -1 && m_vk_presentFamily != -1) {
 			queueIndicesFound = true;
 			break;
 		}
@@ -97,14 +102,45 @@ void GSWndVK::InitVulkan()
 		fprintf(stderr, "Vulkan: Couldn't get the required queue family indices\n");
 		throw GSDXError();
 	}
-
-	VkDeviceQueueCreateInfo queueCreateInfo = {};
-	queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-	queueCreateInfo.queueFamilyIndex = m_vk_graphicsFamily;
-	queueCreateInfo.queueCount = 1;
+	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+	std::set<uint32_t> uniqueQueueFamilies = {
+		m_vk_graphicsFamily, m_vk_presentFamily
+	};
 	float queuePrirority = 1.0f;
-	queueCreateInfo.pQueuePriorities = &queuePrirority;
-	
+	for (uint32_t queueFamily : uniqueQueueFamilies) {
+		VkDeviceQueueCreateInfo queueCreateInfo = {};
+		queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		queueCreateInfo.queueFamilyIndex = m_vk_graphicsFamily;
+		queueCreateInfo.queueCount = 1;
+		queueCreateInfo.pQueuePriorities = &queuePrirority;
+		queueCreateInfos.push_back(queueCreateInfo);
+	}
+	VkPhysicalDeviceFeatures deviceFeatures = {};
+	VkDeviceCreateInfo deviceCreateInfo = {};
+	deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+	deviceCreateInfo.pQueueCreateInfos = queueCreateInfos.data();
+	deviceCreateInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
+	deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
+	deviceCreateInfo.enabledExtensionCount = 0;
+	deviceCreateInfo.enabledLayerCount = 0;
+	result = vkCreateDevice(m_vk_PhysicalDevice, &deviceCreateInfo, nullptr, &m_vk_LogicalDevice);
+	if (result != VK_SUCCESS) {
+		fprintf(stderr, "Vulkan: Couldn't create the logical device\n");
+		throw GSDXError();
+	}
+	vkGetDeviceQueue(m_vk_LogicalDevice, m_vk_graphicsFamily, 0, &m_vk_GraphicsQueue);
+	vkGetDeviceQueue(m_vk_LogicalDevice, m_vk_presentFamily, 0, &m_vk_PresentQueue);
+
+
+	VkXlibSurfaceCreateInfoKHR surfaceCreateInfo = {};
+	surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR;
+	surfaceCreateInfo.dpy = m_NativeDisplay;
+	surfaceCreateInfo.window = m_NativeWindow;
+	result = vkCreateXlibSurfaceKHR(m_vk_Instance, &surfaceCreateInfo, nullptr, &m_vk_Surface);
+	if (result != VK_SUCCESS) {
+		fprintf(stderr, "Vulkan: Couldn't create the surface\n");
+		throw GSDXError();
+	}
 }
 
 bool GSWndVK::Create(const std::string& title, int w, int h) 
