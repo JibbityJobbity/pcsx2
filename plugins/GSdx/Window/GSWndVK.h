@@ -52,18 +52,18 @@ protected:
 
 public:
 	GSWndVK();
-	virtual ~GSWndVK();
+	~GSWndVK();
 
 	bool Create(const std::string& title, int w, int h);
-	bool Attach(void* handle, bool managed = true);
-	void Detach();
+	bool Attach(void* handle, bool managed = true) {return true;}
+	void Detach(){};
 	void* GetDisplay();
-	void* GetHandle();
-	GSVector4i GetClientRect();
-	bool SetWindowText(const char* title);
-	void Show();
-	void Hide();
-	void HideFrame();
+	void* GetHandle(){return nullptr;}
+	GSVector4i GetClientRect(){return GSVector4i();}
+	bool SetWindowText(const char* title) {return true;}
+	void Show(){};
+	void Hide(){};
+	void HideFrame(){};
 };
 
 #endif
