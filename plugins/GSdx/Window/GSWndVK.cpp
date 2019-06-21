@@ -25,6 +25,16 @@ GSWndVK::GSWndVK()
 	
 }
 
+GSWndVK::~GSWndVK() 
+{
+
+}
+
+void* GSWndVK::GetDisplay()
+{
+	 return m_NativeDisplay; 
+}
+
 void GSWndVK::InitVulkan()
 {
 	/*
