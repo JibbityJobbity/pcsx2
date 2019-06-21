@@ -21,22 +21,31 @@
 #include "GSWnd.h"
 
 #if defined(__unix__)
+#define VK_USE_PLATFORM_XLIB_KHR
 #include <X11/Xlib.h>
 #include <GL/glx.h>
 #include <vulkan/vulkan.h>
 #include <vector>
+#include <set>
 
 class GSWndVK : public GSWnd
 {
 protected:
+	const std::vector<const char*> vk_deviceExtensions = {
+		VK_KHR_SWAPCHAIN_EXTENSION_NAME
+	};
 	Window		m_NativeWindow;
 	Display* 	m_NativeDisplay;
 	bool		m_has_late_vsync;
 
-	uint32_t m_vk_graphicsFamily = -1;
+	uint32_t	m_vk_graphicsFamily = -1;
+	uint32_t	m_vk_presentFamily = -1;
 	VkInstance	m_vk_Instance;
 	VkPhysicalDevice	m_vk_PhysicalDevice = VK_NULL_HANDLE;
 	VkDevice	m_vk_LogicalDevice = VK_NULL_HANDLE;
+	VkQueue		m_vk_GraphicsQueue;
+	VkQueue		m_vk_PresentQueue;
+	VkSurfaceKHR	m_vk_Surface;
 
 	void InitVulkan();
 
