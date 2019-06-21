@@ -30,8 +30,9 @@ void GSWndVK::InitVulkan()
 	/*
 	 *	This function is just a bunch of Vulkan setup stuff.
 	 *	I feel like it's fairly justified given the amount
-	 *	of control devs are responsible for. I'll fix it if
-	 *	someone bugs me enough.
+	 *	of control devs are responsible for. You'll have to 
+	 *	excuse how sloppy it is though, I'll fix it if someone
+	 *	bugs me enough.
 	 *	tl;dr this thing is entirely vulkan duct tape. heckle me, idc
 	 *	- Hamish
 	 */
@@ -59,21 +60,37 @@ void GSWndVK::InitVulkan()
 		throw GSDXError();
 	}
 
-	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 	uint32_t deviceCount = 0;
 	vkEnumeratePhysicalDevices(m_vk_Instance, &deviceCount, nullptr);
 	if (deviceCount == 0) {
-		fprintf(stderr, "Vulkan: Couldn't get physical devices\n");
+		fprintf(stderr, "Vulkan: Couldn't detect any physical devices\n");
 		throw GSDXError();
 	}
-
 	std::vector<VkPhysicalDevice> devices(deviceCount);
 	vkEnumeratePhysicalDevices(m_vk_Instance, &deviceCount, devices.data());
-	m_vk_PhysicalDevice = devices.at(0);
+	for (VkPhysicalDevice dev : devices) {
+		uint32_t extensionCount;
+		vkEnumerateDeviceExtensionProperties(m_vk_PhysicalDevice, nullptr, &extensionCount, nullptr);
+		std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+		vkEnumerateDeviceExtensionProperties(m_vk_PhysicalDevice, nullptr, &extensionCount, availableExtensions.data());
+		std::set<std::string> requiredExtensions(vk_deviceExtensions.begin(), vk_deviceExtensions.end());
+		for (const auto& extension: availableExtensions) {
+			requiredExtensions.erase(extension.extensionName);
+		}
+
+		if (requiredExtensions.empty()) {
+			m_vk_PhysicalDevice = dev;
+			break;
+		}
+	}
+	if (m_vk_PhysicalDevice == VK_NULL_HANDLE) {
+		fprintf(stderr, "Vulkan: Couldn't find a suitable physical device\n");
+		throw GSDXError();
+	}
 	VkPhysicalDeviceProperties deviceProperties;
 	vkGetPhysicalDeviceProperties(m_vk_PhysicalDevice, &deviceProperties);
-	fprintf(stdout, "Vulkan information:\n");
-	fprintf(stdout, "\t%s\n\t%s\n", 
+	fprintf(stdout, "Vulkan device information:\n");
+	fprintf(stdout, "\t%s\n\t%i\n", 
 		deviceProperties.deviceName, 
 		deviceProperties.driverVersion);
 
@@ -92,7 +109,7 @@ void GSWndVK::InitVulkan()
 		if (queueFamily.queueCount > 0 && presentSupport) {
 			m_vk_presentFamily = i;
 		}
-		if (m_vk_graphicsFamily != -1 && m_vk_presentFamily != -1) {
+		if (m_vk_graphicsFamily != std::numeric_limits<uint32_t>::max() && m_vk_presentFamily != std::numeric_limits<uint32_t>::max()) {
 			queueIndicesFound = true;
 			break;
 		}
@@ -121,7 +138,8 @@ void GSWndVK::InitVulkan()
 	deviceCreateInfo.pQueueCreateInfos = queueCreateInfos.data();
 	deviceCreateInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
 	deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
-	deviceCreateInfo.enabledExtensionCount = 0;
+	deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(vk_deviceExtensions.size());
+	deviceCreateInfo.ppEnabledExtensionNames = vk_deviceExtensions.data();
 	deviceCreateInfo.enabledLayerCount = 0;
 	result = vkCreateDevice(m_vk_PhysicalDevice, &deviceCreateInfo, nullptr, &m_vk_LogicalDevice);
 	if (result != VK_SUCCESS) {

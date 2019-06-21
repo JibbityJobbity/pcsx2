@@ -27,6 +27,7 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 #include <set>
+#include <limits>
 
 class GSWndVK : public GSWnd
 {
@@ -38,8 +39,8 @@ protected:
 	Display* 	m_NativeDisplay;
 	bool		m_has_late_vsync;
 
-	uint32_t	m_vk_graphicsFamily = -1;
-	uint32_t	m_vk_presentFamily = -1;
+	uint32_t	m_vk_graphicsFamily = std::numeric_limits<uint32_t>::max();
+	uint32_t	m_vk_presentFamily = std::numeric_limits<uint32_t>::max();
 	VkInstance	m_vk_Instance;
 	VkPhysicalDevice	m_vk_PhysicalDevice = VK_NULL_HANDLE;
 	VkDevice	m_vk_LogicalDevice = VK_NULL_HANDLE;
