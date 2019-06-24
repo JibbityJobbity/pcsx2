@@ -61,7 +61,7 @@ public:
 	~GSWndVK();
 
 	bool Create(const std::string& title, int w, int h);
-	bool Attach(void* handle, bool managed = true) {return true;}
+	bool Attach(void* handle, bool managed = true);
 	void Detach(){};
 	void* GetDisplay();
 	void* GetHandle(){return nullptr;}

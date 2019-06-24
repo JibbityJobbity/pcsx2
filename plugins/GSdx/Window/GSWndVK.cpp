@@ -80,9 +80,9 @@ void GSWndVK::InitVulkan()
 	vkEnumeratePhysicalDevices(m_vk_Instance, &deviceCount, devices.data());
 	for (VkPhysicalDevice dev : devices) {
 		uint32_t extensionCount;
-		vkEnumerateDeviceExtensionProperties(m_vk_PhysicalDevice, nullptr, &extensionCount, nullptr);
+		vkEnumerateDeviceExtensionProperties(dev, nullptr, &extensionCount, nullptr);
 		std::vector<VkExtensionProperties> availableExtensions(extensionCount);
-		vkEnumerateDeviceExtensionProperties(m_vk_PhysicalDevice, nullptr, &extensionCount, availableExtensions.data());
+		vkEnumerateDeviceExtensionProperties(dev, nullptr, &extensionCount, availableExtensions.data());
 		std::set<std::string> requiredExtensions(vk_deviceExtensions.begin(), vk_deviceExtensions.end());
 		for (const auto& extension: availableExtensions) {
 			requiredExtensions.erase(extension.extensionName);
@@ -103,6 +103,18 @@ void GSWndVK::InitVulkan()
 	fprintf(stdout, "\t%s\n\t%i\n", 
 		deviceProperties.deviceName, 
 		deviceProperties.driverVersion);
+
+
+	VkXlibSurfaceCreateInfoKHR surfaceCreateInfo = {};
+	surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR;
+	surfaceCreateInfo.dpy = m_NativeDisplay;
+	surfaceCreateInfo.window = m_NativeWindow;
+	result = vkCreateXlibSurfaceKHR(m_vk_Instance, &surfaceCreateInfo, nullptr, &m_vk_Surface);
+	if (result != VK_SUCCESS) {
+		fprintf(stderr, "Vulkan: Couldn't create the surface\n");
+		throw GSDXError();
+	}
+
 
 	uint32_t queueFamilyCount = 0;
 	vkGetPhysicalDeviceQueueFamilyProperties(m_vk_PhysicalDevice, &queueFamilyCount, nullptr);
@@ -159,17 +171,6 @@ void GSWndVK::InitVulkan()
 	vkGetDeviceQueue(m_vk_LogicalDevice, m_vk_graphicsFamily, 0, &m_vk_GraphicsQueue);
 	vkGetDeviceQueue(m_vk_LogicalDevice, m_vk_presentFamily, 0, &m_vk_PresentQueue);
 
-
-	VkXlibSurfaceCreateInfoKHR surfaceCreateInfo = {};
-	surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR;
-	surfaceCreateInfo.dpy = m_NativeDisplay;
-	surfaceCreateInfo.window = m_NativeWindow;
-	result = vkCreateXlibSurfaceKHR(m_vk_Instance, &surfaceCreateInfo, nullptr, &m_vk_Surface);
-	if (result != VK_SUCCESS) {
-		fprintf(stderr, "Vulkan: Couldn't create the surface\n");
-		throw GSDXError();
-	}
-
 	VkSurfaceCapabilitiesKHR surfaceCapabilities;
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_vk_PhysicalDevice, m_vk_Surface, &surfaceCapabilities);
 
@@ -217,9 +218,9 @@ void GSWndVK::InitVulkan()
 		m_vk_swapExtent.height = std::max(surfaceCapabilities.minImageExtent.height, std::min(surfaceCapabilities.maxImageExtent.height, m_vk_swapExtent.height));
 	}
 
-	uint32_t imageCount = surfaceCapabilities.minImageCount + 1;
-	if (surfaceCapabilities.maxImageCount > 0 && imageCount > surfaceCapabilities.maxImageCount) {
-		imageCount = surfaceCapabilities.maxImageCount;
+	uint32_t swapImageCount = surfaceCapabilities.minImageCount + 1;
+	if (surfaceCapabilities.maxImageCount > 0 && swapImageCount > surfaceCapabilities.maxImageCount) {
+		swapImageCount = surfaceCapabilities.maxImageCount;
 	}
 
 	VkSwapchainCreateInfoKHR swapchainCreateInfo = {};
@@ -304,6 +305,17 @@ bool GSWndVK::Create(const std::string& title, int w, int h)
 	
 	m_w = w;
 	m_h = h;
+	InitVulkan();
+
+	return true;
+}
+
+bool GSWndVK::Attach(void* handle, bool managed)
+{
+	m_NativeWindow = *(Window*)handle;
+	m_managed = managed;
+
+	m_NativeDisplay = XOpenDisplay(NULL);
 	InitVulkan();
 
 	return true;
