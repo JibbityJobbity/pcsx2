@@ -320,3 +320,22 @@ bool GSWndVK::Attach(void* handle, bool managed)
 
 	return true;
 }
+
+bool GSWndVK::SetWindowText(const char* title)
+{
+	if (!m_managed) return true;
+
+	XTextProperty prop;
+
+	memset(&prop, 0, sizeof(prop));
+
+	char* ptitle = (char*)title;
+	if (XStringListToTextProperty(&ptitle, 1, &prop)) {
+		XSetWMName(m_NativeDisplay, m_NativeWindow, &prop);
+	}
+
+	XFree(prop.value);
+	XFlush(m_NativeDisplay);
+
+	return true;
+}
