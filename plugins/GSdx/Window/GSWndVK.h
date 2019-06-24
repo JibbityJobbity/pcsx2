@@ -66,7 +66,7 @@ public:
 	void* GetDisplay();
 	void* GetHandle(){return nullptr;}
 	GSVector4i GetClientRect(){return GSVector4i();}
-	bool SetWindowText(const char* title) {return true;}
+	bool SetWindowText(const char* title);
 	void Show(){};
 	void Hide(){};
 	void HideFrame(){};
