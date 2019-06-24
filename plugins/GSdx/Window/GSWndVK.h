@@ -32,6 +32,7 @@
 class GSWndVK : public GSWnd
 {
 protected:
+	int m_w, m_h;
 	const std::vector<const char*> vk_deviceExtensions = {
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME
 	};
@@ -47,6 +48,11 @@ protected:
 	VkQueue		m_vk_GraphicsQueue;
 	VkQueue		m_vk_PresentQueue;
 	VkSurfaceKHR	m_vk_Surface;
+	VkSwapchainKHR	m_vk_SwapChain;
+	VkExtent2D	m_vk_swapExtent;
+	VkFormat	m_vk_swapChainFormat;
+	std::vector<VkImage>	m_vk_SwapChainImages;
+	std::vector<VkImageView>	m_vk_SwapChainImageViews;
 
 	void InitVulkan();
 
