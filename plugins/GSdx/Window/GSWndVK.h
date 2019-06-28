@@ -18,7 +18,6 @@
  *
  */
 
-#pragma once
 #include "GSWnd.h"
 
 #if defined(__unix__)
@@ -34,9 +33,26 @@ class GSWndVK : public GSWnd
 {
 protected:
 	int m_w, m_h;
+	const std::vector<const char*> vk_deviceExtensions = {
+		VK_KHR_SWAPCHAIN_EXTENSION_NAME
+	};
 	Window		m_NativeWindow;
 	Display* 	m_NativeDisplay;
 	bool		m_has_late_vsync;
+
+	uint32_t	m_vk_graphicsFamily = std::numeric_limits<uint32_t>::max();
+	uint32_t	m_vk_presentFamily = std::numeric_limits<uint32_t>::max();
+	VkInstance	m_vk_Instance;
+	VkPhysicalDevice	m_vk_PhysicalDevice = VK_NULL_HANDLE;
+	VkDevice	m_vk_LogicalDevice = VK_NULL_HANDLE;
+	VkQueue		m_vk_GraphicsQueue;
+	VkQueue		m_vk_PresentQueue;
+	VkSurfaceKHR	m_vk_Surface;
+	VkSwapchainKHR	m_vk_SwapChain;
+	VkExtent2D	m_vk_swapExtent;
+	VkFormat	m_vk_swapChainFormat;
+	std::vector<VkImage>	m_vk_SwapChainImages;
+	std::vector<VkImageView>	m_vk_SwapChainImageViews;
 
 	void InitVulkan();
 
@@ -48,7 +64,6 @@ public:
 	bool Attach(void* handle, bool managed = true);
 	void Detach(){};
 	void* GetDisplay();
-	Window GetNativeWindow();
 	void* GetHandle(){return nullptr;}
 	GSVector4i GetClientRect(){return GSVector4i();}
 	bool SetWindowText(const char* title);
