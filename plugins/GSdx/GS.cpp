@@ -277,7 +277,8 @@ static int _GSopen(void** dsp, const char* title, GSRendererType renderer, int t
 #endif
 					break;
 #if defined(__unix__)
-				case GSRendererType::VK:
+				case GSRendererType::VK_HW:
+				case GSRendererType::VK_SW:
 					wnds.push_back(std::make_shared<GSWndVK>());
 					break;
 #endif
@@ -339,6 +340,7 @@ static int _GSopen(void** dsp, const char* title, GSRendererType renderer, int t
 
 		switch (renderer)
 		{
+		case GSRendererType::VK_SW:
 		case GSRendererType::DX1011_SW:
 		case GSRendererType::OGL_SW:
 			renderer_mode = "(Software renderer)";
@@ -386,7 +388,8 @@ static int _GSopen(void** dsp, const char* title, GSRendererType renderer, int t
 			renderer_fullname = "OpenGL";
 			break;
 #if defined(__unix__)
-		case GSRendererType::VK:
+		case GSRendererType::VK_HW:
+		case GSRendererType::VK_SW:
 			dev = new GSDeviceVK();
 			s_renderer_name = " VK";
 			renderer_fullname = "Vulkan";
@@ -416,10 +419,11 @@ static int _GSopen(void** dsp, const char* title, GSRendererType renderer, int t
 				s_gs = (GSRenderer*)new GSRendererOGL();
 				s_renderer_type = " HW";
 				break;
-			case GSRendererType::VK:
+			case GSRendererType::VK_HW:
 				s_gs = (GSRenderer*)new GSRendererVK();
 				s_renderer_type = " HW";
 				break;
+			case GSRendererType::VK_SW:
 			case GSRendererType::DX1011_SW:
 			case GSRendererType::OGL_SW:
 				s_gs = new GSRendererSW(threads);

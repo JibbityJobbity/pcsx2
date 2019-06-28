@@ -70,6 +70,15 @@ public:
 
 	bool Create(const std::shared_ptr<GSWnd> &wnd);
 	bool Reset(int w, int h);
+	//void Present(const GSVector4i& r, int shader);
+	//void Present(GSTexture* sTex, GSTexture* dTex, const GSVector4& dRect, int shader = 0);
+
+	//void SetVsync(int vsync);
+
+	//void BeginScene();
+	//void DrawPrimitive();
+	//void DrawIndexedPrimitive();
+	//void DrawIndexedPrimitive(int offset, int count);
 };
 
 #endif
