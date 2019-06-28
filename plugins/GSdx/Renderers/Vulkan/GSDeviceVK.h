@@ -22,17 +22,6 @@
 
 #include "Renderers/Common/GSDevice.h"
 #include "GSTextureVK.h"
-#include "Window/GSWndVK.h"
-
-#if defined(__unix__)
-#define VK_USE_PLATFORM_XLIB_KHR
-#include <X11/Xlib.h>
-#include <GL/glx.h>
-#include <vulkan/vulkan.h>
-#include <vector>
-#include <set>
-#include <limits>
-
 
 class GSDeviceVK : public GSDevice
 {
@@ -43,33 +32,12 @@ private:
 	void DoInterlace(GSTexture* sTex, GSTexture* dTex, int shader, bool linear, float yoffset = 0) {}
 	uint16 ConvertBlendEnum(uint16 generic) { return 0xFFFF; }
 
-protected:
-	std::vector<const char*> m_vk_deviceExtensions = {
-		VK_KHR_SWAPCHAIN_EXTENSION_NAME
-	};
-	std::vector<const char*> m_vk_instanceExtensions = {
-		VK_KHR_SURFACE_EXTENSION_NAME,
-		VK_KHR_XLIB_SURFACE_EXTENSION_NAME
-	};
-	VkInstance	m_vk_Instance;
-	uint32_t	m_vk_graphicsFamily = std::numeric_limits<uint32_t>::max();
-	uint32_t	m_vk_presentFamily = std::numeric_limits<uint32_t>::max();
-	VkPhysicalDevice	m_vk_PhysicalDevice = VK_NULL_HANDLE;
-	VkDevice	m_vk_LogicalDevice = VK_NULL_HANDLE;
-	VkQueue		m_vk_GraphicsQueue;
-	VkQueue		m_vk_PresentQueue;
-	VkSurfaceKHR	m_vk_Surface;
-	VkSwapchainKHR	m_vk_SwapChain;
-	VkExtent2D	m_vk_swapExtent;
-	VkFormat	m_vk_swapChainFormat;
-	std::vector<VkImage>	m_vk_SwapChainImages;
-	std::vector<VkImageView>	m_vk_SwapChainImageViews;
-
 public:
-	GSDeviceVK();
+	GSDeviceVK() {
+		
+	}
 
 	bool Create(const std::shared_ptr<GSWnd> &wnd);
 	bool Reset(int w, int h);
 };
 
-#endif
