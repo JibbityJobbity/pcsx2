@@ -33,8 +33,13 @@ class GSWndVK : public GSWnd
 {
 protected:
 	int m_w, m_h;
+#ifdef __linux__
 	Window		m_NativeWindow;
 	Display* 	m_NativeDisplay;
+#endif
+#ifdef WIN32
+	HWND		m_NativeWindow;
+#endif
 	bool		m_has_late_vsync;
 
 	void InitVulkan();

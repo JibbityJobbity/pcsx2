@@ -276,12 +276,10 @@ static int _GSopen(void** dsp, const char* title, GSRendererType renderer, int t
 					wnds.push_back(std::make_shared<GSWndWGL>());
 #endif
 					break;
-#if defined(__unix__)
 				case GSRendererType::VK_HW:
 				case GSRendererType::VK_SW:
 					wnds.push_back(std::make_shared<GSWndVK>());
 					break;
-#endif
 				default:
 #ifdef _WIN32
 					wnds.push_back(std::make_shared<GSWndDX>());
@@ -387,14 +385,12 @@ static int _GSopen(void** dsp, const char* title, GSRendererType renderer, int t
 			s_renderer_name = " OGL";
 			renderer_fullname = "OpenGL";
 			break;
-#if defined(__unix__)
 		case GSRendererType::VK_HW:
 		case GSRendererType::VK_SW:
 			dev = new GSDeviceVK();
 			s_renderer_name = " VK";
 			renderer_fullname = "Vulkan";
 			break;
-#endif
 		}
 
 		printf("Current Renderer: %s %s\n", renderer_fullname, renderer_mode);
