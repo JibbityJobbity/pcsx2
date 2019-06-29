@@ -62,8 +62,13 @@ protected:
 	VkSwapchainKHR	m_vk_SwapChain;
 	VkExtent2D	m_vk_swapExtent;
 	VkFormat	m_vk_swapChainFormat;
+	VkPipelineLayout m_vk_PipelineLayout;
+	VkPipeline	m_vk_currentPipeline;
+	VkRenderPass	m_vk_renderPass;
 	std::vector<VkImage>	m_vk_SwapChainImages;
 	std::vector<VkImageView>	m_vk_SwapChainImageViews;
+
+	void createPipeline();
 
 public:
 	GSDeviceVK();
