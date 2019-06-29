@@ -23,6 +23,7 @@
 
 GSDeviceVK::GSDeviceVK()
 {
+	Vulkan::load_vulkan();
 }
 
 bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
@@ -54,14 +55,18 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 	VkResult result = vkCreateInstance(&instanceCreateInfo, nullptr, &m_vk_Instance);
 	if (result != VK_SUCCESS) {
 		fprintf(stderr, "Vulkan: Couldn't create instance\n");
-		throw GSDXError();
+		return false;
+	}
+	if (!Vulkan::load_instance_functions(m_vk_Instance)) {
+		fprintf(stderr, "Vulkan: Couldn't load instance functions");
+		return false;
 	}
 
 	uint32_t deviceCount = 0;
 	vkEnumeratePhysicalDevices(m_vk_Instance, &deviceCount, nullptr);
 	if (deviceCount == 0) {
 		fprintf(stderr, "Vulkan: Couldn't detect any physical devices\n");
-		throw GSDXError();
+		return false;
 	}
 	std::vector<VkPhysicalDevice> devices(deviceCount);
 	vkEnumeratePhysicalDevices(m_vk_Instance, &deviceCount, devices.data());
@@ -82,7 +87,7 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 	}
 	if (m_vk_PhysicalDevice == VK_NULL_HANDLE) {
 		fprintf(stderr, "Vulkan: Detected physical devices but none were suitable\n");
-		throw GSDXError();
+		return false;
 	}
 	VkPhysicalDeviceProperties deviceProperties;
 	vkGetPhysicalDeviceProperties(m_vk_PhysicalDevice, &deviceProperties);
@@ -106,7 +111,7 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 	result = vkCreateXlibSurfaceKHR(m_vk_Instance, &surfaceCreateInfo, nullptr, &m_vk_Surface);
 	if (result != VK_SUCCESS) {
 		fprintf(stderr, "Vulkan: Couldn't create the surface\n");
-		throw GSDXError();
+		return false;
 	}
 
 
@@ -133,7 +138,7 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 	}
 	if (!queueIndicesFound) {
 		fprintf(stderr, "Vulkan: Couldn't get the required queue family indices\n");
-		throw GSDXError();
+		return false;
 	}
 	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 	std::set<uint32_t> uniqueQueueFamilies = {
@@ -160,7 +165,11 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 	result = vkCreateDevice(m_vk_PhysicalDevice, &deviceCreateInfo, nullptr, &m_vk_LogicalDevice);
 	if (result != VK_SUCCESS) {
 		fprintf(stderr, "Vulkan: Couldn't create the logical device\n");
-		throw GSDXError();
+		return false;
+	}
+	if (!Vulkan::load_device_functions(m_vk_LogicalDevice)) {
+		fprintf(stderr, "Vulkan: Couldn't load device functions");
+		return false;
 	}
 	vkGetDeviceQueue(m_vk_LogicalDevice, m_vk_graphicsFamily, 0, &m_vk_GraphicsQueue);
 	vkGetDeviceQueue(m_vk_LogicalDevice, m_vk_presentFamily, 0, &m_vk_PresentQueue);
@@ -172,7 +181,7 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 	vkGetPhysicalDeviceSurfaceFormatsKHR(m_vk_PhysicalDevice, m_vk_Surface, &formatCount, nullptr);
 	if (formatCount == 0) {
 		fprintf(stderr, "Vulkan: This physical device doesn't support any surfaces");
-		throw GSDXError();
+		return false;
 	}
 	std::vector<VkSurfaceFormatKHR> formats;
 	formats.resize(formatCount);
@@ -190,7 +199,7 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 	vkGetPhysicalDeviceSurfacePresentModesKHR(m_vk_PhysicalDevice, m_vk_Surface, &presentModeCount, nullptr);
 	if (presentModeCount == 0) {
 		fprintf(stderr, "Vulkan: This physical device doesn't support any present modes");
-		throw GSDXError();
+		return false;
 	}
 	std::vector<VkPresentModeKHR> presentModes;
 	presentModes.resize(presentModeCount);
@@ -244,7 +253,7 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 	result = vkCreateSwapchainKHR(m_vk_LogicalDevice, &swapchainCreateInfo, nullptr, &m_vk_SwapChain);
 	if (result != VK_SUCCESS) {
 		fprintf(stderr, "Vulkan: Swapchain creation failed");
-		throw GSDXError();
+		return false;
 	}
 	uint32_t imageCount;
 	vkGetSwapchainImagesKHR(m_vk_LogicalDevice, m_vk_SwapChain, &imageCount, nullptr);
@@ -271,7 +280,7 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 		result = vkCreateImageView(m_vk_LogicalDevice, &imageViewCreateInfo, nullptr, &m_vk_SwapChainImageViews[i]);
 		if (result != VK_SUCCESS) {
 			fprintf(stderr, "Vulkan: Couldn't create image %i", i);
-			throw GSDXError();
+			return false;
 		}
 	}
 
@@ -349,7 +358,7 @@ void GSDeviceVK::createPipeline()
 	pipelineLayoutInfo.pSetLayouts = nullptr;
 	pipelineLayoutInfo.pushConstantRangeCount = 0;
 	pipelineLayoutInfo.pPushConstantRanges = nullptr;
-	result = vkCreatePipelineLayout(m_vk_LogicalDevice, &pipelineLayoutInfo, nullptr, &pipelineLayout);
+	result = vkCreatePipelineLayout(m_vk_LogicalDevice, &pipelineLayoutInfo, nullptr, &m_vk_PipelineLayout);
 	if (result != VK_SUCCESS) {
 		fprintf(stderr, "Vulkan: Couldn't create pipeline layout");
 		throw GSDXError();
@@ -387,8 +396,8 @@ void GSDeviceVK::createPipeline()
 	VkGraphicsPipelineCreateInfo pipelineInfo = {};
 	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 	pipelineInfo.stageCount = 2;
-	pipelineInfo.pStages = shaderStages; // TODO: SHADERS!!!
-	pipelineInfo.pVertexInputState = &vertexInputInfo;
+	//pipelineInfo.pStages = shaderStages; // TODO: SHADERS!!!
+	//pipelineInfo.pVertexInputState = &vertexInputInfo;
 	pipelineInfo.pInputAssemblyState = &inputAssembly;
 	pipelineInfo.pViewportState = &viewportState;
 	pipelineInfo.pRasterizationState = &rasterizer;

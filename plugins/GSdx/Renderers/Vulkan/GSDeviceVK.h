@@ -24,11 +24,9 @@
 #include "GSTextureVK.h"
 #include "Window/GSWndVK.h"
 
-#if defined(__unix__)
-#define VK_USE_PLATFORM_XLIB_KHR
 #include <X11/Xlib.h>
 #include <GL/glx.h>
-#include <vulkan/vulkan.h>
+#include "vulkanloader.hpp"
 #include <vector>
 #include <set>
 #include <limits>
@@ -85,5 +83,3 @@ public:
 	//void DrawIndexedPrimitive();
 	//void DrawIndexedPrimitive(int offset, int count);
 };
-
-#endif

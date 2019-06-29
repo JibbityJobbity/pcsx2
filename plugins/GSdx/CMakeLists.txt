@@ -124,6 +124,7 @@ set(GSdxSources
     Renderers/Vulkan/GSDeviceVK.cpp
     Renderers/Vulkan/GSRendererVK.cpp
     Renderers/Vulkan/GSTextureVK.cpp
+    Renderers/Vulkan/vulkanloader.cpp
     Window/GSSetting.cpp
     Window/GSWnd.cpp
     )
@@ -206,6 +207,7 @@ set(GSdxHeaders
     Renderers/Vulkan/GSDeviceVK.h
     Renderers/Vulkan/GSRendererVK.h
     Renderers/Vulkan/GSTextureVK.h
+    Renderers/Vulkan/vulkanloader.hpp
     Window/GSCaptureDlg.h
     Window/GSDialog.h
     Window/GSSetting.h
@@ -268,7 +270,7 @@ set(GSdxFinalSources
 set(GSdxFinalLibs
     ${X11_LIBRARIES}
     ${OPENGL_LIBRARIES}
-    ${Vulkan_LIBRARIES}
+    #${Vulkan_LIBRARIES}
     ${GTK2_LIBRARIES}
     ${LIBC_LIBRARIES}
     ${PNG_LIBRARIES}
