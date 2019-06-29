@@ -21,10 +21,10 @@
 #pragma once
 #include "GSWnd.h"
 
-#if defined(__unix__)
-#define VK_USE_PLATFORM_XLIB_KHR
+#ifdef __linux__
 #include <X11/Xlib.h>
 #include <GL/glx.h>
+#endif
 #include <vector>
 #include <set>
 #include <limits>
@@ -37,8 +37,8 @@ protected:
 	Window		m_NativeWindow;
 	Display* 	m_NativeDisplay;
 #endif
-#ifdef WIN32
-	HWND		m_NativeWindow;
+#ifdef _WIN32
+	HWND		m_NativeDisplay;
 #endif
 	bool		m_has_late_vsync;
 
@@ -52,7 +52,9 @@ public:
 	bool Attach(void* handle, bool managed = true);
 	void Detach(){};
 	void* GetDisplay();
+#ifdef __linux__
 	Window GetNativeWindow();
+#endif
 	void* GetHandle(){return nullptr;}
 	GSVector4i GetClientRect(){return GSVector4i();}
 	bool SetWindowText(const char* title);
@@ -60,5 +62,3 @@ public:
 	void Hide(){};
 	void HideFrame(){};
 };
-
-#endif

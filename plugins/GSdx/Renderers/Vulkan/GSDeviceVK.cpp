@@ -46,6 +46,12 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 	appInfo.engineVersion = VK_MAKE_VERSION(0, 1, 0);
 	appInfo.apiVersion = VK_API_VERSION_1_1;
 
+#ifdef VK_USE_PLATFORM_XLIB_KHR
+	m_vk_instanceExtensions.push_back(VK_KHR_XLIB_SURFACE_EXTENSION_NAME);
+#endif
+#ifdef VK_USE_PLATFORM_WIN32_KHR
+	m_vk_instanceExtensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+#endif
 	VkInstanceCreateInfo instanceCreateInfo = {};
 	instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	instanceCreateInfo.pApplicationInfo = &appInfo;
@@ -118,7 +124,7 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 #ifdef VK_USE_PLATFORM_WIN32_KHR
 	VkWin32SurfaceCreateInfoKHR surfaceCreateInfo = {};
 	surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-	surfaceCreateInfo.hwnd = ((GSWndVK*)m_wnd.get())->GetDisplay();
+	surfaceCreateInfo.hwnd = (HWND)((GSWndVK*)m_wnd.get())->GetDisplay();
 	surfaceCreateInfo.hinstance = GetModuleHandle(nullptr);
 	result = vkCreateWin32SurfaceKHR(m_vk_Instance, &surfaceCreateInfo, nullptr, &m_vk_Surface);
 	if (result != VK_SUCCESS) {
