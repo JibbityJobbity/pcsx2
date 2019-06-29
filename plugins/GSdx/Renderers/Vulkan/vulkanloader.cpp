@@ -151,7 +151,7 @@ namespace Vulkan
     {
         if (vulkan_module)
         {
-            #ifdef VK_USE_PLATFORM_WIN32_KHR
+			#ifdef VK_USE_PLATFORM_WIN32_KHR
             FreeLibrary(vulkan_module);
             #else
             dlclose(vulkan_module);

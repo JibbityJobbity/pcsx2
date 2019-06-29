@@ -96,6 +96,10 @@
     <ClCompile Include="GSAlignedClass.cpp" />
     <ClCompile Include="GSBlock.cpp" />
     <ClCompile Include="GSCapture.cpp" />
+    <ClCompile Include="Renderers\Vulkan\GSDeviceVK.cpp" />
+    <ClCompile Include="Renderers\Vulkan\GSRendererVK.cpp" />
+    <ClCompile Include="Renderers\Vulkan\GSTextureVK.cpp" />
+    <ClCompile Include="Renderers\Vulkan\vulkanloader.cpp" />
     <ClCompile Include="Window\GSCaptureDlg.cpp" />
     <ClCompile Include="GSClut.cpp" />
     <ClCompile Include="GSCodeBuffer.cpp" />
@@ -161,6 +165,7 @@
     <ClCompile Include="Renderers\Common\GSVertexTrace.cpp" />
     <ClCompile Include="Window\GSWnd.cpp" />
     <ClCompile Include="Window\GSWndDX.cpp" />
+    <ClCompile Include="Window\GSWndVK.cpp" />
     <ClCompile Include="Window\GSWndWGL.cpp" />
     <ClCompile Include="PSX\GPU.cpp" />
     <ClCompile Include="PSX\GPUDrawScanline.cpp" />
@@ -183,6 +188,10 @@
     <ClInclude Include="GSAlignedClass.h" />
     <ClInclude Include="GSBlock.h" />
     <ClInclude Include="GSCapture.h" />
+    <ClInclude Include="Renderers\Vulkan\GSDeviceVK.h" />
+    <ClInclude Include="Renderers\Vulkan\GSRendererVK.h" />
+    <ClInclude Include="Renderers\Vulkan\GSTextureVK.h" />
+    <ClInclude Include="Renderers\Vulkan\vulkanloader.hpp" />
     <ClInclude Include="Window\GSCaptureDlg.h" />
     <ClInclude Include="GSClut.h" />
     <ClInclude Include="GSCodeBuffer.h" />
@@ -247,6 +256,7 @@
     <ClInclude Include="Renderers\Common\GSVertexTrace.h" />
     <ClInclude Include="Window\GSWnd.h" />
     <ClInclude Include="Window\GSWndDX.h" />
+    <ClInclude Include="Window\GSWndVK.h" />
     <ClInclude Include="Window\GSWndWGL.h" />
     <ClInclude Include="PSX\GPU.h" />
     <ClInclude Include="PSX\GPUDrawingEnvironment.h" />

@@ -4,7 +4,7 @@
 // macro hell
 #define VK_NO_PROTOTYPES
 
-#ifdef WIN32
+#ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN // don't include useless nonsense
 #define NOMINMAX // don't include stupid macros
 #define VK_USE_PLATFORM_WIN32_KHR // this includes windows.h for us

@@ -24,15 +24,20 @@
 #include "GSTextureVK.h"
 #include "Window/GSWndVK.h"
 
+#ifdef __linux__
+#define VK_USE_PLATFORM_XLIB_KHR
 #include <X11/Xlib.h>
 #include <GL/glx.h>
+#elif defined(_WIN32)
+#define VK_USE_PLATFORM_WIN32_KHR
+#endif
 #include "vulkanloader.hpp"
 #include <vector>
 #include <set>
 #include <limits>
 
 
-class GSDeviceVK : public GSDevice
+	class GSDeviceVK : public GSDevice
 {
 private:
 	GSTexture* CreateSurface(int type, int w, int h, int format);
@@ -46,8 +51,7 @@ protected:
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME
 	};
 	std::vector<const char*> m_vk_instanceExtensions = {
-		VK_KHR_SURFACE_EXTENSION_NAME,
-		VK_KHR_XLIB_SURFACE_EXTENSION_NAME
+		VK_KHR_SURFACE_EXTENSION_NAME
 	};
 	VkInstance	m_vk_Instance;
 	uint32_t	m_vk_graphicsFamily = std::numeric_limits<uint32_t>::max();

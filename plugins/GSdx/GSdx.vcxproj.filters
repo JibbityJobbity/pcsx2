@@ -267,6 +267,21 @@
     <ClCompile Include="Window\GSSettingsDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Window\GSWndVK.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\Vulkan\GSDeviceVK.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\Vulkan\GSRendererVK.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\Vulkan\GSTextureVK.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\Vulkan\vulkanloader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Renderers\OpenGL\GLLoader.h">
@@ -540,6 +555,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Renderers\Common\GSFastList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderers\Vulkan\GSDeviceVK.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderers\Vulkan\vulkanloader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderers\Vulkan\GSTextureVK.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderers\Vulkan\GSRendererVK.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Window\GSWndVK.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -35,16 +35,19 @@ void* GSWndVK::GetDisplay()
 	return m_NativeDisplay; 
 }
 
+#ifdef __linux__
 Window GSWndVK::GetNativeWindow()
 {
 	return m_NativeWindow;
 }
+#endif
 
 void GSWndVK::InitVulkan()
 {
 
 }
 
+#ifdef __linux__
 bool GSWndVK::Create(const std::string& title, int w, int h) 
 {
 	if (m_NativeWindow)
@@ -71,6 +74,7 @@ bool GSWndVK::Create(const std::string& title, int w, int h)
 
 	return true;
 }
+#endif
 
 bool GSWndVK::Attach(void* handle, bool managed)
 {
@@ -79,8 +83,8 @@ bool GSWndVK::Attach(void* handle, bool managed)
 	m_NativeWindow = *(Window*)handle;
 	m_NativeDisplay = XOpenDisplay(NULL);
 #endif
-#ifdef WIN32
-	m_NativeWindow = (HWND)handle;
+#ifdef _WIN32
+	m_NativeDisplay = (HWND)handle;
 #endif
 	InitVulkan();
 
@@ -89,6 +93,7 @@ bool GSWndVK::Attach(void* handle, bool managed)
 
 bool GSWndVK::SetWindowText(const char* title)
 {
+#ifdef __linux__
 	if (!m_managed) return true;
 
 	XTextProperty prop;
@@ -102,6 +107,7 @@ bool GSWndVK::SetWindowText(const char* title)
 
 	XFree(prop.value);
 	XFlush(m_NativeDisplay);
+#endif
 
 	return true;
 }
