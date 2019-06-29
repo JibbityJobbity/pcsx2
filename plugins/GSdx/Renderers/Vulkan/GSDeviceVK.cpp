@@ -104,6 +104,7 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 		fprintf(stdout, "\t%s\n", ext);
 	}
 
+#ifdef VK_USE_PLATFORM_XLIB_KHR
 	VkXlibSurfaceCreateInfoKHR surfaceCreateInfo = {};
 	surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR;
 	surfaceCreateInfo.dpy = (Display*)((GSWndVK*)m_wnd.get())->GetDisplay();
@@ -113,7 +114,18 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 		fprintf(stderr, "Vulkan: Couldn't create the surface\n");
 		return false;
 	}
-
+#endif
+#ifdef VK_USE_PLATFORM_WIN32_KHR
+	VkWin32SurfaceCreateInfoKHR surfaceCreateInfo = {};
+	surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+	surfaceCreateInfo.hwnd = ((GSWndVK*)m_wnd.get())->GetDisplay();
+	surfaceCreateInfo.hinstance = GetModuleHandle(nullptr);
+	result = vkCreateWin32SurfaceKHR(m_vk_Instance, &surfaceCreateInfo, nullptr, &m_vk_Surface);
+	if (result != VK_SUCCESS) {
+		fprintf(stderr, "Vulkan: Couldn't create the surface\n");
+		return false;
+	}
+#endif
 
 	uint32_t queueFamilyCount = 0;
 	vkGetPhysicalDeviceQueueFamilyProperties(m_vk_PhysicalDevice, &queueFamilyCount, nullptr);

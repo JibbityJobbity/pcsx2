@@ -74,10 +74,14 @@ bool GSWndVK::Create(const std::string& title, int w, int h)
 
 bool GSWndVK::Attach(void* handle, bool managed)
 {
-	m_NativeWindow = *(Window*)handle;
 	m_managed = managed;
-
+#ifdef __linux__
+	m_NativeWindow = *(Window*)handle;
 	m_NativeDisplay = XOpenDisplay(NULL);
+#endif
+#ifdef WIN32
+	m_NativeWindow = (HWND)handle;
+#endif
 	InitVulkan();
 
 	return true;
