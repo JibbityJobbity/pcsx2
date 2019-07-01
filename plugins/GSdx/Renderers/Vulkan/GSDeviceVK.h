@@ -77,6 +77,7 @@ protected:
 
 public:
 	GSDeviceVK();
+	~GSDeviceVK();
 
 	bool Create(const std::shared_ptr<GSWnd> &wnd);
 	bool Reset(int w, int h);

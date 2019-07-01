@@ -459,6 +459,20 @@ GSTexture* GSDeviceVK::CreateSurface(int type, int w, int h, int format)
 	return new GSTextureVK(type, w, h, format);
 }
 
+GSDeviceVK::~GSDeviceVK() 
+{
+	for (auto imageView : m_vk_SwapChainImageViews) {
+		vkDestroyImageView(m_vk_LogicalDevice, imageView, nullptr);
+	}
+	vkDestroySwapchainKHR(m_vk_LogicalDevice, m_vk_SwapChain, nullptr);
+	vkDestroyDevice(m_vk_LogicalDevice, nullptr);
+	if (enableValidationLayers) {
+		vkDestroyDebugUtilsMessengerEXT(m_vk_Instance, m_vk_debugMessenger, nullptr);
+	}
+	vkDestroySurfaceKHR(m_vk_Instance, m_vk_Surface, nullptr);
+	vkDestroyInstance(m_vk_Instance, nullptr);
+}
+
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
     fprintf(stderr, "Vulkan message: %s\n", pCallbackData->pMessage);
 
