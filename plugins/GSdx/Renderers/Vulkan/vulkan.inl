@@ -34,8 +34,8 @@ VK_INSTANCE_FUNC( vkCreateWin32SurfaceKHR )
 VK_INSTANCE_FUNC( vkCreateXlibSurfaceKHR )
 #endif
 
-//VK_INSTANCE_FUNC( vkCreateDebugUtilsMessengerEXT )
-//VK_INSTANCE_FUNC( vkDestroyDebugUtilsMessengerEXT )
+VK_INSTANCE_FUNC( vkCreateDebugUtilsMessengerEXT )
+VK_INSTANCE_FUNC( vkDestroyDebugUtilsMessengerEXT )
 VK_INSTANCE_FUNC( vkDestroySurfaceKHR )
 #endif
 
