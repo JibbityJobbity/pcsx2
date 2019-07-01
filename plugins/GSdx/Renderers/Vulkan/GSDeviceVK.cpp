@@ -52,20 +52,38 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 #ifdef VK_USE_PLATFORM_WIN32_KHR
 	m_vk_instanceExtensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
 #endif
+	if (enableValidationLayers) {
+		//m_vk_layers.resize(m_vk_layers.size() + 1);
+		m_vk_layers.push_back("VK_LAYER_KHRONOS_validation");
+		m_vk_instanceExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+	}
 	VkInstanceCreateInfo instanceCreateInfo = {};
 	instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	instanceCreateInfo.pApplicationInfo = &appInfo;
 	instanceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(m_vk_instanceExtensions.size());
 	instanceCreateInfo.ppEnabledExtensionNames = m_vk_instanceExtensions.data();
-	instanceCreateInfo.enabledLayerCount = 0;
+	instanceCreateInfo.enabledLayerCount = static_cast<uint32_t>(m_vk_layers.size());
+	instanceCreateInfo.ppEnabledLayerNames = m_vk_layers.data();
 	VkResult result = vkCreateInstance(&instanceCreateInfo, nullptr, &m_vk_Instance);
 	if (result != VK_SUCCESS) {
 		fprintf(stderr, "Vulkan: Couldn't create instance\n");
 		return false;
 	}
 	if (!Vulkan::load_instance_functions(m_vk_Instance)) {
-		fprintf(stderr, "Vulkan: Couldn't load instance functions");
+		fprintf(stderr, "Vulkan: Couldn't load instance functions\n");
 		return false;
+	}
+	if (enableValidationLayers) {
+		VkDebugUtilsMessengerCreateInfoEXT debugUtilsCreateInfo = {};
+		debugUtilsCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+		debugUtilsCreateInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+		debugUtilsCreateInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+		debugUtilsCreateInfo.pfnUserCallback = debugCallback;
+		result = vkCreateDebugUtilsMessengerEXT(m_vk_Instance, &debugUtilsCreateInfo, nullptr, &m_vk_debugMessenger);
+		if (result != VK_SUCCESS) {
+			fprintf(stderr, "Vulkan: Couldn't create debug messenger\n");
+			return false;
+		}
 	}
 
 	uint32_t deviceCount = 0;
@@ -340,7 +358,7 @@ void GSDeviceVK::createPipeline()
 	rasterizer.depthBiasConstantFactor = 0.0f;
 	rasterizer.depthBiasClamp = 0.0f;
 	rasterizer.depthBiasSlopeFactor = 0.0f;
-	VkPipelineMultisampleStateCreateInfo multisampling = {};	// Change this if we want MSAA
+	VkPipelineMultisampleStateCreateInfo multisampling = {};
 	multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 	multisampling.sampleShadingEnable = VK_FALSE;
 	multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
@@ -440,3 +458,8 @@ GSTexture* GSDeviceVK::CreateSurface(int type, int w, int h, int format)
 	return new GSTextureVK(type, w, h, format);
 }
 
+static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
+    fprintf(stderr, "Vulkan message: %s\n", pCallbackData->pMessage);
+
+    return VK_FALSE;
+}

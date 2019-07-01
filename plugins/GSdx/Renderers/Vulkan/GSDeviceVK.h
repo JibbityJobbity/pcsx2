@@ -37,9 +37,10 @@
 #include <limits>
 
 
-	class GSDeviceVK : public GSDevice
+class GSDeviceVK : public GSDevice
 {
 private:
+	const bool enableValidationLayers = true;
 	GSTexture* CreateSurface(int type, int w, int h, int format);
 
 	void DoMerge(GSTexture* sTex[3], GSVector4* sRect, GSTexture* dTex, GSVector4* dRect, const GSRegPMODE& PMODE, const GSRegEXTBUF& EXTBUF, const GSVector4& c) {}
@@ -53,6 +54,8 @@ protected:
 	std::vector<const char*> m_vk_instanceExtensions = {
 		VK_KHR_SURFACE_EXTENSION_NAME
 	};
+	std::vector<const char*> m_vk_layers;
+	VkDebugUtilsMessengerEXT	m_vk_debugMessenger;
 	VkInstance	m_vk_Instance;
 	uint32_t	m_vk_graphicsFamily = std::numeric_limits<uint32_t>::max();
 	uint32_t	m_vk_presentFamily = std::numeric_limits<uint32_t>::max();
@@ -87,3 +90,7 @@ public:
 	//void DrawIndexedPrimitive();
 	//void DrawIndexedPrimitive(int offset, int count);
 };
+static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+		VkDebugUtilsMessageTypeFlagsEXT messageType,
+		const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+		void* pUserData);
