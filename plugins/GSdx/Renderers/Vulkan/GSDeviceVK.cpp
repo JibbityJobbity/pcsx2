@@ -270,8 +270,9 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 	swapchainCreateInfo.imageExtent = m_vk_swapExtent;
 	swapchainCreateInfo.imageArrayLayers = 1;
 	swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+	swapchainCreateInfo.minImageCount = swapImageCount;
 	uint32_t queueFamilyIndices[] = {m_vk_graphicsFamily, m_vk_presentFamily};
-	if (m_vk_graphicsFamily == m_vk_presentFamily) {
+	if (m_vk_graphicsFamily != m_vk_presentFamily) {
 		swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
 		swapchainCreateInfo.queueFamilyIndexCount = 2;
 		swapchainCreateInfo.pQueueFamilyIndices = queueFamilyIndices;
