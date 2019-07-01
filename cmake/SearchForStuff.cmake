@@ -18,7 +18,6 @@ find_package(LibLZMA)
 # is deprecated as of cmake 3.11.
 set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL)
-find_package(Vulkan)
 find_package(PNG)
 find_package(Vtune)
 # The requirement of wxWidgets is checked in SelectPcsx2Plugins module
@@ -166,10 +165,6 @@ endif()
 
 if(OPENGL_FOUND)
 	include_directories(${OPENGL_INCLUDE_DIR})
-endif()
-
-if(Vulkan_FOUND)
-    include_directories(${Vulkan_INCLUDE_DIRS})
 endif()
 
 if(SDL_FOUND AND NOT SDL2_API)
