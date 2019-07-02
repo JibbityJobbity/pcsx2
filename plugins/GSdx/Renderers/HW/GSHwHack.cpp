@@ -578,6 +578,11 @@ bool GSC_DevilMayCry3(const GSFrameInfo& fi, int& skip)
 {
 	if(skip == 0)
 	{
+		if(fi.TME && fi.FBP == 0x01800 && fi.FPSM == PSM_PSMCT16 && fi.TBP0 == 0x01000 && fi.TPSM == PSM_PSMZ16)
+		{
+			// Texture shuffle/depth not handled properly.
+			skip = 32;
+		}
 		if(fi.TME && fi.FBP == 0x01800 && fi.FPSM == PSM_PSMZ32 && fi.TBP0 == 0x0800 && fi.TPSM == PSM_PSMT8H)
 		{
 			skip = 16;
@@ -754,27 +759,6 @@ bool GSC_SakuraWarsSoLongMyLove(const GSFrameInfo& fi, int& skip)
 		else if(fi.TME && (fi.FBP ==0 || fi.FBP ==0x1180) && fi.FPSM == PSM_PSMCT32 && fi.TBP0 ==0x3F3F && fi.TPSM == PSM_PSMT8)
 		{
 			skip = 1; // Floodlight
-		}
-	}
-
-	return true;
-}
-
-bool GSC_SonicUnleashed(const GSFrameInfo& fi, int& skip)
-{
-	if(skip == 0)
-	{
-		if(fi.TME && fi.FPSM == PSM_PSMCT16S && fi.TBP0 == 0x00000 && fi.TPSM == PSM_PSMCT16)
-		{
-			// Improper Texture shuffle emulation.
-			skip = 1000; // shadow
-		}
-	}
-	else
-	{
-		if(fi.TME && fi.FBP == 0x00000 && fi.FPSM == PSM_PSMCT16 && fi.TPSM == PSM_PSMCT16S)
-		{
-			skip = 2;
 		}
 	}
 
@@ -1513,7 +1497,6 @@ void GSState::SetupCrcHack()
 		// Texture shuffle
 		lut[CRC::BigMuthaTruckers] = GSC_BigMuthaTruckers;
 		lut[CRC::DeathByDegreesTekkenNinaWilliams] = GSC_DeathByDegreesTekkenNinaWilliams; // + Upscaling issues
-		lut[CRC::SonicUnleashed] = GSC_SonicUnleashed;
 
 		// Upscaling hacks
 		lut[CRC::Bully] = GSC_Bully;
