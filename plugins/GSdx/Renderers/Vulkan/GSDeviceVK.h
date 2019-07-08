@@ -35,6 +35,7 @@
 #include <vector>
 #include <set>
 #include <limits>
+#include <array>
 
 
 class GSDeviceVK : public GSDevice
@@ -90,6 +91,10 @@ public:
 	//void DrawPrimitive();
 	//void DrawIndexedPrimitive();
 	//void DrawIndexedPrimitive(int offset, int count);
+
+	void IASetVertexBuffer(const void* vertices, size_t count);
+	void IASetIndexBuffer(const void* index, size_t count);
+	void IASetPrimitiveTopology(GLenum topology)
 };
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 		VkDebugUtilsMessageTypeFlagsEXT messageType,
