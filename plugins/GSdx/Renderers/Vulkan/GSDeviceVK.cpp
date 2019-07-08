@@ -429,12 +429,31 @@ void GSDeviceVK::createPipeline()
 		throw GSDXError();
 	}
 
+	VkVertexInputBindingDescription vertexBindingDescription = {};
+	vertexBindingDescription.binding = 0;
+	vertexBindingDescription.stride = sizeof(float);
+	vertexBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+	std::array<VkVertexInputAttributeDescription, 2> vertexAttributeDescriptions = {};
+	vertexAttributeDescriptions[0].binding = 0;
+	vertexAttributeDescriptions[0].location = 0;
+	vertexAttributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+	vertexAttributeDescriptions[0].offset = 0;
+	vertexAttributeDescriptions[1].binding = 0;
+	vertexAttributeDescriptions[1].location = 1;
+	vertexAttributeDescriptions[1].format = VK_FORMAT_R32G32_SFLOAT;
+	vertexAttributeDescriptions[1].offset = 2 * sizeof(float);
+	VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
+	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+	vertexInputInfo.pVertexAttributeDescriptions = vertexAttributeDescriptions.data();
+	vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(vertexAttributeDescriptions.size());
+	vertexInputInfo.pVertexBindingDescriptions = &vertexBindingDescription;
+	vertexInputInfo.vertexBindingDescriptionCount = 1;
 
 	VkGraphicsPipelineCreateInfo pipelineInfo = {};
 	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 	pipelineInfo.stageCount = 2;
 	//pipelineInfo.pStages = shaderStages; // TODO: SHADERS!!!
-	//pipelineInfo.pVertexInputState = &vertexInputInfo;
+	pipelineInfo.pVertexInputState = &vertexInputInfo;
 	pipelineInfo.pInputAssemblyState = &inputAssembly;
 	pipelineInfo.pViewportState = &viewportState;
 	pipelineInfo.pRasterizationState = &rasterizer;
@@ -471,6 +490,12 @@ GSDeviceVK::~GSDeviceVK()
 	}
 	vkDestroySurfaceKHR(m_vk_Instance, m_vk_Surface, nullptr);
 	vkDestroyInstance(m_vk_Instance, nullptr);
+	Vulkan::release_vulkan();
+}
+
+void GSDeviceVK::IASetVertexBuffer(const void* vertices, size_t count)
+{
+
 }
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
