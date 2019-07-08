@@ -29,15 +29,17 @@ GSDeviceVK::GSDeviceVK()
 bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 {
 	m_wnd = wnd;
-	/*
-	 *	This function is just a bunch of Vulkan setup stuff.
-	 *	I feel like it's fairly justified given the amount
-	 *	of control devs are responsible for. You'll have to 
-	 *	excuse how sloppy it is though, I'll fix it if someone
-	 *	bugs me enough.
-	 *	tl;dr this thing is entirely vulkan duct tape. heckle me, idc
-	 *	- Hamish
-	 */
+	if (!InitVulkanInstance())
+		return false;
+	if (!CreateSwapchain())
+		return false;
+
+	
+	return true;
+}
+
+bool GSDeviceVK::InitVulkanInstance()
+{
 	VkApplicationInfo appInfo = {};
 	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 	appInfo.pApplicationName = "PCSX2 GSdx (VK Renderer v0.1)";
@@ -128,6 +130,16 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 		fprintf(stdout, "\t%s\n", ext);
 	}
 
+	return true;
+}
+
+bool GSDeviceVK::CreateSwapchain()
+{
+	//if (!m_vk_LogicalDevice || !m_vk_Instance) {
+	//	return false;
+	//}
+	VkResult result;
+	
 #ifdef VK_USE_PLATFORM_XLIB_KHR
 	VkXlibSurfaceCreateInfoKHR surfaceCreateInfo = {};
 	surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR;
@@ -324,7 +336,7 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 	return true;
 }
 
-void GSDeviceVK::createPipeline()
+bool GSDeviceVK::CreatePipeline()
 {
 	VkResult result;
 	VkPipelineInputAssemblyStateCreateInfo inputAssembly = {};
@@ -431,17 +443,17 @@ void GSDeviceVK::createPipeline()
 
 	VkVertexInputBindingDescription vertexBindingDescription = {};
 	vertexBindingDescription.binding = 0;
-	vertexBindingDescription.stride = sizeof(float);
+	vertexBindingDescription.stride = sizeof(GSVertexPT1);
 	vertexBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 	std::array<VkVertexInputAttributeDescription, 2> vertexAttributeDescriptions = {};
 	vertexAttributeDescriptions[0].binding = 0;
 	vertexAttributeDescriptions[0].location = 0;
-	vertexAttributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+	vertexAttributeDescriptions[0].format = VK_FORMAT_R32G32B32A32_SFLOAT;
 	vertexAttributeDescriptions[0].offset = 0;
 	vertexAttributeDescriptions[1].binding = 0;
 	vertexAttributeDescriptions[1].location = 1;
 	vertexAttributeDescriptions[1].format = VK_FORMAT_R32G32_SFLOAT;
-	vertexAttributeDescriptions[1].offset = 2 * sizeof(float);
+	vertexAttributeDescriptions[1].offset = sizeof(GSVector4);
 	VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
 	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 	vertexInputInfo.pVertexAttributeDescriptions = vertexAttributeDescriptions.data();

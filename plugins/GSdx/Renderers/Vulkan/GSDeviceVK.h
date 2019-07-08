@@ -21,6 +21,7 @@
 #pragma once
 
 #include "Renderers/Common/GSDevice.h"
+#include "Renderers/Common/GSVertex.h"
 #include "GSTextureVK.h"
 #include "Window/GSWndVK.h"
 
@@ -74,7 +75,9 @@ protected:
 	std::vector<VkImage>	m_vk_SwapChainImages;
 	std::vector<VkImageView>	m_vk_SwapChainImageViews;
 
-	void createPipeline();
+	bool InitVulkanInstance();
+	bool CreateSwapchain();
+	bool CreatePipeline();
 
 public:
 	GSDeviceVK();
@@ -94,7 +97,7 @@ public:
 
 	void IASetVertexBuffer(const void* vertices, size_t count);
 	void IASetIndexBuffer(const void* index, size_t count);
-	void IASetPrimitiveTopology(GLenum topology)
+	void IASetPrimitiveTopology(GLenum topology);
 };
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 		VkDebugUtilsMessageTypeFlagsEXT messageType,
