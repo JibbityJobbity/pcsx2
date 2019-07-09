@@ -33,6 +33,7 @@
 #define VK_USE_PLATFORM_WIN32_KHR
 #endif
 #include "vulkanloader.hpp"
+#include <SPIRV/GlslangToSpv.h>
 #include <vector>
 #include <set>
 #include <limits>
@@ -71,13 +72,30 @@ protected:
 	VkFormat	m_vk_swapChainFormat;
 	VkPipelineLayout m_vk_PipelineLayout;
 	VkPipeline	m_vk_currentPipeline;
+	struct {
+		VkPipeline 			pipeline;
+		VkPipelineLayout	pipelineLayout;
+	} m_vk_convertPipeline;
 	VkRenderPass	m_vk_renderPass;
+	std::vector<VkFramebuffer>		m_vk_swapChainFramebuffers;
+	std::vector<VkCommandBuffer>	m_vk_drawPrimitiveBuffers;
+	std::vector<VkCommandBuffer>	m_vk_drawIPrimitiveBuffers;
+	VkCommandPool		m_vk_commandPool;
 	std::vector<VkImage>	m_vk_SwapChainImages;
 	std::vector<VkImageView>	m_vk_SwapChainImageViews;
+	VkBuffer m_vk_currentVertexBuffer;
+	size_t m_vertexCount = 4;
+
 
 	bool InitVulkanInstance();
 	bool CreateSwapchain();
 	bool CreatePipeline();
+	bool CreateConvertPipeline();
+	bool SetupConvertPipelines();
+	bool SetupCommandPool();
+	void SetVertexBuffer(std::vector<GSVertexPT1> vertices);
+	//std::vector<char> glslToSpirV(const char * path, ShaderStage shader_stage);
+	
 
 public:
 	GSDeviceVK();
