@@ -33,7 +33,7 @@
 #define VK_USE_PLATFORM_WIN32_KHR
 #endif
 #include "vulkanloader.hpp"
-#include <SPIRV/GlslangToSpv.h>
+//#include <SPIRV/GlslangToSpv.h>
 #include <vector>
 #include <set>
 #include <limits>
