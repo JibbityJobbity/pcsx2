@@ -22,7 +22,74 @@
 #include "GSDeviceVK.h"
 #include "GSTextureVK.h"
 
+GSDeviceVK::GSDeviceVK()
+{
+	Vulkan::LoadVulkan();
+}
+
+bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
+{
+	m_wnd = wnd;
+
+	if (!InitInstance()) {
+		return false;
+	}
+
+	return true;
+}
+
+bool GSDeviceVK::InitInstance()
+{
+	VkResult result;
+
+	VkApplicationInfo appInfo = {};
+	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+	appInfo.pApplicationName = "GSdx";
+	appInfo.applicationVersion = VK_MAKE_VERSION(0, 1, 0);
+	appInfo.pEngineName = "GSdx";
+	appInfo.engineVersion = VK_MAKE_VERSION(0, 1, 0);
+	appInfo.apiVersion = VK_API_VERSION_1_1;
+
+	#ifdef VK_USE_PLATFORM_XLIB_KHR
+		m_vk.instanceExtensions.push_back(VK_KHR_XLIB_SURFACE_EXTENSION_NAME);
+	#endif
+	#ifdef VK_USE_PLATFORM_WIN32_KHR
+		m_vk.instanceExtensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+	#endif
+
+	VkInstanceCreateInfo instanceCreateInfo = {};
+	instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+	instanceCreateInfo.pApplicationInfo = &appInfo;
+	instanceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(m_vk.instanceExtensions.size());
+	instanceCreateInfo.ppEnabledExtensionNames = m_vk.instanceExtensions.data();
+	instanceCreateInfo.enabledLayerCount = 0;
+	instanceCreateInfo.ppEnabledLayerNames = nullptr;
+	result = vkCreateInstance(&instanceCreateInfo, nullptr, &m_vk.instance);
+
+	if (result != VK_SUCCESS) {
+		fprintf(stderr, "VULKAN: Couldn't create the Vulkan instance\n");
+		return false;
+	}
+	if (!Vulkan::LoadInstanceFunctions(m_vk.instance)) {
+		fprintf(stderr, "VULKAN: Error loading instance functions\n");
+		return false;
+	}
+
+	return true;
+}
+
+GSDeviceVK::~GSDeviceVK()
+{
+	vkDestroyInstance(m_vk.instance, nullptr);
+	Vulkan::ReleaseVulkan();
+}
+
 GSTexture* GSDeviceVK::CreateSurface(int type, int w, int h, int format)
 {
 	return new GSTextureVK(type, w, h, format);
+}
+
+bool GSDeviceVK::Reset(int w, int h)
+{
+	return GSDevice::Reset(w, h);
 }

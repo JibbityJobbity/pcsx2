@@ -3,11 +3,13 @@ VK_GLOBAL_FUNC( vkGetInstanceProcAddr )
 #endif
 
 #ifdef VK_MODULE_FUNC
-// TODO
+VK_MODULE_FUNC( vkCreateInstance )
+VK_MODULE_FUNC( vkEnumerateInstanceLayerProperties )
+VK_MODULE_FUNC( vkEnumerateInstanceExtensionProperties )
 #endif
 
 #ifdef VK_INSTANCE_FUNC
-// TODO
+VK_INSTANCE_FUNC( vkDestroyInstance )
 #endif
 
 #ifdef VK_DEVICE_FUNC
