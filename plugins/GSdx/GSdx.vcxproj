@@ -90,6 +90,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Window\GSWndWVK.cpp" />
+    <ClCompile Include="Renderers\Vulkan\GSDeviceVK.cpp" />
+    <ClCompile Include="Renderers\Vulkan\GSTextureVK.cpp" />
     <ClCompile Include="Renderers\Vulkan\vulkanloader.cpp" />
     <ClCompile Include="Renderers\OpenGL\GLLoader.cpp" />
     <ClCompile Include="Renderers\OpenGL\GLState.cpp" />
@@ -178,6 +181,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h" />
+    <ClInclude Include="Window\GSWndWVK.h" />
+    <ClInclude Include="Window\GSWndVK.h" />
+    <ClInclude Include="Renderers\Vulkan\GSDeviceVK.h" />
+    <ClInclude Include="Renderers\Vulkan\GSTextureVK.h" />
     <ClInclude Include="Renderers\Vulkan\vulkanloader.hpp" />
     <ClInclude Include="Renderers\OpenGL\GLLoader.h" />
     <ClInclude Include="Renderers\OpenGL\GLState.h" />
