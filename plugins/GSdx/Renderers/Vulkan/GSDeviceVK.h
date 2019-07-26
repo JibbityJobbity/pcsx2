@@ -22,6 +22,8 @@
 #include "Renderers/Common/GSDevice.h"
 #include "vulkanloader.hpp"
 #include <vector>
+#include <limits>
+#include <set>
 
 class GSDeviceVK : public GSDevice {
 private:
@@ -32,13 +34,24 @@ private:
 	uint16 ConvertBlendEnum(uint16 generic) { return 0xFFFF; }
 protected:
 	struct {
+		std::vector<const char*> deviceExtensions = {
+			VK_KHR_SWAPCHAIN_EXTENSION_NAME
+		};
 		std::vector<const char*> instanceExtensions = {
 			VK_KHR_SURFACE_EXTENSION_NAME
 		};
 		VkInstance instance;
+		VkPhysicalDevice physicalDevice;
+		VkDevice logicalDevice;
+		VkSurfaceKHR surface;
+		uint32_t graphicsFamily = std::numeric_limits<uint32_t>::max(), 
+			presentFamily = std::numeric_limits<uint32_t>::max();
 	} m_vk;
 
+	VkPhysicalDevice PickDevice(std::vector<VkPhysicalDevice>& devices);
+
 	bool InitInstance();
+	bool CreateDevice();
 
 public:
 	GSDeviceVK();

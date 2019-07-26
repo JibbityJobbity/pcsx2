@@ -21,6 +21,11 @@
 #include "stdafx.h"
 #include "GSDeviceVK.h"
 #include "GSTextureVK.h"
+#ifdef _WIN32
+#include "Window/GSWndWVK.h"
+#else
+#include "Window/GSWndXVK.h"
+#endif
 
 GSDeviceVK::GSDeviceVK()
 {
@@ -32,6 +37,9 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 	m_wnd = wnd;
 
 	if (!InitInstance()) {
+		return false;
+	}
+	if (!CreateDevice()) {
 		return false;
 	}
 
@@ -76,6 +84,141 @@ bool GSDeviceVK::InitInstance()
 	}
 
 	return true;
+}
+
+bool GSDeviceVK::CreateDevice()
+{
+	VkResult result;
+	
+#ifdef VK_USE_PLATFORM_XLIB_KHR
+	VkXlibSurfaceCreateInfoKHR surfaceCreateInfo = {};
+	surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR;
+	surfaceCreateInfo.dpy = (Display*)((GSWndXVK*)m_wnd.get())->GetDisplay();
+	surfaceCreateInfo.window = (Window)((GSWndXVK*)m_wnd.get())->GetHandle();
+	result = vkCreateXlibSurfaceKHR(m_vk.instance, &surfaceCreateInfo, nullptr, &m_vk.surface);
+	if (result != VK_SUCCESS) {
+		fprintf(stderr, "Vulkan: Couldn't create the surface\n");
+		return false;
+	}
+#endif
+#ifdef VK_USE_PLATFORM_WIN32_KHR
+	VkWin32SurfaceCreateInfoKHR surfaceCreateInfo = {};
+	surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+	surfaceCreateInfo.hwnd = (HWND)((GSWndVK*)m_wnd.get())->GetDisplay();
+	surfaceCreateInfo.hinstance = GetModuleHandle(nullptr);
+	result = vkCreateWin32SurfaceKHR(m_vk_Instance, &surfaceCreateInfo, nullptr, &m_vk_Surface);
+	if (result != VK_SUCCESS) {
+		fprintf(stderr, "Vulkan: Couldn't create the surface\n");
+		return false;
+	}
+#endif
+	
+	uint32_t devCount = 0;
+	vkEnumeratePhysicalDevices(m_vk.instance, &devCount, nullptr);
+	if (devCount == 0) {
+		fprintf(stderr, "VULKAN: Couldn't detect any physical devices\n");
+	}
+	std::vector<VkPhysicalDevice> devices(devCount);
+	vkEnumeratePhysicalDevices(m_vk.instance, &devCount, devices.data());
+	m_vk.physicalDevice = PickDevice(devices);
+	if (m_vk.physicalDevice == VK_NULL_HANDLE) {
+		fprintf(stderr, "VULKAN: Could find a physical device but none were suitable\n");
+		return false;
+	}
+
+	VkPhysicalDeviceProperties devProps;
+	vkGetPhysicalDeviceProperties(m_vk.physicalDevice, &devProps);
+	fprintf(stdout, "Vulkan rendering device information:\n");
+	fprintf(stdout, "\tDevice name: %s\n\tDriver version: %s\n\tAPI version: %s\n\n", 
+		devProps.deviceName, 
+		devProps.deviceName, 
+		devProps.apiVersion
+	);
+	fprintf(stdout, "Enabled instance extensions:\n");
+	for (const char* ext : m_vk.instanceExtensions) {
+		fprintf(stdout, "\t%s", ext);
+	}
+	fprintf(stdout, "Enabled device extensions:\n");
+	for (const char* ext : m_vk.deviceExtensions) {
+		fprintf(stdout, "\t%s", ext);
+	}
+
+	uint32_t queueFamilyCount = 0;
+	vkGetPhysicalDeviceQueueFamilyProperties(m_vk.physicalDevice, &queueFamilyCount, nullptr);
+	std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+	vkGetPhysicalDeviceQueueFamilyProperties(m_vk.physicalDevice, &queueFamilyCount, queueFamilies.data());
+	int i = 0;
+	bool queueIndicesFound = false;
+	for (const auto& queueFamily : queueFamilies) {
+		VkBool32 presentSupport = false;
+		vkGetPhysicalDeviceSurfaceSupportKHR(m_vk.physicalDevice, i, m_vk.surface, &presentSupport); // Assumes our current device supports presentation. Could cause issues.
+		if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+			m_vk.graphicsFamily = i;
+		}
+		if (queueFamily.queueCount > 0 && presentSupport) {
+			m_vk.presentFamily = i;
+		}
+		if (m_vk.graphicsFamily != std::numeric_limits<uint32_t>::max() && m_vk.presentFamily != std::numeric_limits<uint32_t>::max()) {
+			queueIndicesFound = true;
+			break;
+		}
+		i++;
+	}
+	if (!queueIndicesFound) {
+		fprintf(stderr, "Vulkan: Couldn't get the required queue family indices\n");
+		return false;
+	}
+	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+	std::set<uint32_t> uniqueQueueFamilies = {
+		m_vk.graphicsFamily, m_vk.presentFamily
+	};
+	float queuePrirority = 1.0f;
+	for (uint32_t queueFamily : uniqueQueueFamilies) {
+		VkDeviceQueueCreateInfo queueCreateInfo = {};
+		queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		queueCreateInfo.queueFamilyIndex = m_vk.graphicsFamily;
+		queueCreateInfo.queueCount = 1;
+		queueCreateInfo.pQueuePriorities = &queuePrirority;
+		queueCreateInfos.push_back(queueCreateInfo);
+	}
+	VkPhysicalDeviceFeatures deviceFeatures = {};
+	VkDeviceCreateInfo deviceCreateInfo = {};
+	deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+	deviceCreateInfo.pQueueCreateInfos = queueCreateInfos.data();
+	deviceCreateInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
+	deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
+	deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(m_vk.deviceExtensions.size());
+	deviceCreateInfo.ppEnabledExtensionNames = m_vk.deviceExtensions.data();
+	deviceCreateInfo.enabledLayerCount = 0;
+	result = vkCreateDevice(m_vk.physicalDevice, &deviceCreateInfo, nullptr, &m_vk.logicalDevice);
+	if (result != VK_SUCCESS) {
+		fprintf(stderr, "Vulkan: Couldn't create the logical device\n");
+		return false;
+	}
+
+	return true;
+}
+
+VkPhysicalDevice GSDeviceVK::PickDevice(std::vector<VkPhysicalDevice>& devices)
+{
+	VkPhysicalDevice out = VK_NULL_HANDLE;
+	for (VkPhysicalDevice dev : devices) {
+		uint32_t eCount;
+		vkEnumerateDeviceExtensionProperties(dev, nullptr, &eCount, nullptr);
+		std::vector<VkExtensionProperties> availableExtensions(eCount);
+		vkEnumerateDeviceExtensionProperties(dev, nullptr, &eCount, availableExtensions.data());
+		std::set<std::string> requiredExtensions(m_vk.deviceExtensions.begin(), m_vk.deviceExtensions.end());
+		for (const auto& extension: availableExtensions) {
+			requiredExtensions.erase(extension.extensionName);
+		}
+		if (requiredExtensions.empty()) {
+				// TODO choose best gpu or let users choose which GPU to use.
+				// Right now, all we're doing is picking the first proper GPU we see.
+			out = dev;
+			return out;	
+		}
+	}
+	return out;
 }
 
 GSDeviceVK::~GSDeviceVK()
