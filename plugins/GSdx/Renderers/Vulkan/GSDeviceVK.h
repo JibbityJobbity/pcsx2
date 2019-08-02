@@ -20,6 +20,12 @@
 #pragma once
 
 #include "Renderers/Common/GSDevice.h"
+#include "vulkanloader.hpp"
+#include <vector>
+#include <array>
+#include <limits>
+#include <set>
+
 class GSDeviceVK : public GSDevice {
 private:
 	GSTexture* CreateSurface(int type, int w, int h, int format);
@@ -28,6 +34,15 @@ private:
 	void DoInterlace(GSTexture* sTex, GSTexture* dTex, int shader, bool linear, float yoffset = 0) {}
 	uint16 ConvertBlendEnum(uint16 generic) { return 0xFFFF; }
 protected:
+	struct {
+		const std::array<const char*, 2> instance_extensions = {
+			VK_KHR_SURFACE_EXTENSION_NAME
+		};
+		VkInstance instance;
+	} m_vk;
+
+	VkInstance InitInstance();
+	void CleanInstance(VkInstance instance);
 
 public:
 	GSDeviceVK();

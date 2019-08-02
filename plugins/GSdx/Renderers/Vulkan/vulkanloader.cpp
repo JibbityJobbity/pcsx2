@@ -21,8 +21,12 @@
 // will expand to
 // PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr;
 #define VK_GLOBAL_FUNC(func) PFN_##func func;
+#define VK_MODULE_FUNC(func) PFN_##func func;
+#define VK_INSTANCE_FUNC(func) PFN_##func func;
 #include "vulkan.inl"
 #undef VK_GLOBAL_FUNC
+#undef VK_MODULE_FUNC
+#undef VK_INSTANCE_FUNC
 
 // Differences in OS for handling
 // references to dynamically loaded
@@ -82,6 +86,40 @@ namespace Vulkan
 		// names
 		#include "vulkan.inl"
 		#undef VK_GLOBAL_FUNC
+
+		// Module functions are functions which are loaded
+		// from the module with a call to vkGetInstanceProcAddr
+		// note the useage of nullptr for the instance argument
+		// this will be important later
+		#define VK_MODULE_FUNC(func) \
+		if(  !(func = (PFN_##func)vkGetInstanceProcAddr( nullptr, #func )) ) \
+		{ \
+			fprintf(stdout, "Error loading Vulkan module function %s\n", #func); \
+			return false; \
+		} \
+		fprintf(stdout, "Loaded: %s (module)\n", #func); \
+
+		#include "vulkan.inl"
+		#undef VK_MODULE_FUNC
+
+		return true;
+	}
+
+	// Instance functions are functions loaded
+	// by a call to vkGetInstanceProcAddr but
+	// require an instance
+	bool LoadInstanceFunctions(VkInstance instance)
+	{
+		#define VK_INSTANCE_FUNC(func) \
+		if(  !(func = (PFN_##func)vkGetInstanceProcAddr( instance, #func )) ) \
+		{ \
+			fprintf(stderr, "Error loading Vulkan module function %s\n", #func); \
+			return false; \
+		} \
+		fprintf(stderr, "Loaded: %s (instance)\n", #func); \
+
+		#include "vulkan.inl"
+		#undef VK_INSTANCE_FUNC
 
 		return true;
 	}

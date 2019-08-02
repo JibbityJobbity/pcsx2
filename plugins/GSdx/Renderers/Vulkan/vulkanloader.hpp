@@ -26,12 +26,17 @@
 // will expand to
 // extern PFN_vkCreateInstance vkCreateInstance;
 #define VK_GLOBAL_FUNC(func) extern PFN_##func func;
+#define VK_MODULE_FUNC(func) extern PFN_##func func;
+#define VK_INSTANCE_FUNC(func) extern PFN_##func func;
 #include "vulkan.inl"
 #undef VK_GLOBAL_FUNC
+#undef VK_MODULE_FUNC
+#undef VK_INSTANCE_FUNC
 
 namespace Vulkan
 {
 	bool LoadVulkan();
+	bool LoadInstanceFunctions(VkInstance instance);
 	void ReleaseVulkan();
 }
 #endif
