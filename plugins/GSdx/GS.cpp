@@ -28,6 +28,7 @@
 #include "Renderers/OpenGL/GSDeviceOGL.h"
 #include "Renderers/OpenGL/GSRendererOGL.h"
 #include "Renderers/OpenCL/GSRendererCL.h"
+#include "Renderers/Vulkan/GSDeviceVK.h"
 #include "GSLzma.h"
 
 #ifdef _WIN32
@@ -36,6 +37,7 @@
 #include "Renderers/DX11/GSDevice11.h"
 #include "Window/GSWndDX.h"
 #include "Window/GSWndWGL.h"
+#include "Window/GSWndWVK.h"
 #include "Window/GSSettingsDlg.h"
 
 static HRESULT s_hr = E_FAIL;
@@ -44,6 +46,7 @@ static HRESULT s_hr = E_FAIL;
 
 #include "Window/GSWndOGL.h"
 #include "Window/GSWndEGL.h"
+#include "Window/GSWndXVK.h"
 
 #include <gtk/gtk.h>
 #include <gdk/gdkx.h>
@@ -273,6 +276,12 @@ static int _GSopen(void** dsp, const char* title, GSRendererType renderer, int t
 					wnds.push_back(std::make_shared<GSWndWGL>());
 #endif
 					break;
+				case GSRendererType::VK_SW:
+#ifdef __unix__
+					wnds.push_back(std::make_shared<GSWndXVK>());
+#else
+					wnds.push_back(std::make_shared<GSWndWVK>());
+#endif
 				default:
 #ifdef _WIN32
 					wnds.push_back(std::make_shared<GSWndDX>());
@@ -333,6 +342,7 @@ static int _GSopen(void** dsp, const char* title, GSRendererType renderer, int t
 		{
 		case GSRendererType::DX1011_SW:
 		case GSRendererType::OGL_SW:
+		case GSRendererType::VK_SW:
 			renderer_mode = "(Software renderer)";
 			break;
 		case GSRendererType::Null:
@@ -377,6 +387,11 @@ static int _GSopen(void** dsp, const char* title, GSRendererType renderer, int t
 			s_renderer_name = " OGL";
 			renderer_fullname = "OpenGL";
 			break;
+		case GSRendererType::VK_SW:
+			dev = new GSDeviceVK();
+			s_renderer_name = " VK";
+			renderer_fullname = "Vulkan";
+			break;
 		}
 
 		printf("Current Renderer: %s %s\n", renderer_fullname, renderer_mode);
@@ -403,6 +418,7 @@ static int _GSopen(void** dsp, const char* title, GSRendererType renderer, int t
 				break;
 			case GSRendererType::DX1011_SW:
 			case GSRendererType::OGL_SW:
+			case GSRendererType::VK_SW:
 				s_gs = new GSRendererSW(threads);
 				s_renderer_type = " SW";
 				break;
