@@ -351,15 +351,17 @@ void GSSettingsDlg::UpdateControls()
 
 		bool dx11 = renderer == GSRendererType::DX1011_HW || renderer == GSRendererType::DX1011_SW || renderer == GSRendererType::DX1011_OpenCL;
 		bool ogl = renderer == GSRendererType::OGL_HW || renderer == GSRendererType::OGL_SW || renderer == GSRendererType::OGL_OpenCL;
+		bool vk = /*renderer == GSRendererType::VK_HW || */renderer == GSRendererType::VK_SW;
 
-		bool hw =  renderer == GSRendererType::DX1011_HW || renderer == GSRendererType::OGL_HW;
-		bool sw =  renderer == GSRendererType::DX1011_SW || renderer == GSRendererType::OGL_SW;
+		bool hw =  renderer == GSRendererType::DX1011_HW || renderer == GSRendererType::OGL_HW/* || renderer == GSRendererType::VK_HW*/;
+		bool sw =  renderer == GSRendererType::DX1011_SW || renderer == GSRendererType::OGL_SW || renderer == GSRendererType::VK_SW;
 		bool ocl = renderer == GSRendererType::DX1011_OpenCL || renderer == GSRendererType::OGL_OpenCL;
 		bool null = renderer == GSRendererType::Null;
 
-		ShowWindow(GetDlgItem(m_hWnd, IDC_LOGO11), dx11 ? SW_SHOW : SW_HIDE);
 		ShowWindow(GetDlgItem(m_hWnd, IDC_NULL), null ? SW_SHOW : SW_HIDE);
+		ShowWindow(GetDlgItem(m_hWnd, IDC_LOGO11), dx11 ? SW_SHOW : SW_HIDE);
 		ShowWindow(GetDlgItem(m_hWnd, IDC_LOGOGL), ogl ? SW_SHOW : SW_HIDE);
+		ShowWindow(GetDlgItem(m_hWnd, IDC_LOGOVK), vk ? SW_SHOW : SW_HIDE);
 
 #ifndef ENABLE_OPENCL
 		ShowWindow(GetDlgItem(m_hWnd, IDC_OPENCL_TEXT), SW_HIDE);
@@ -398,9 +400,8 @@ void GSSettingsDlg::UpdateControls()
 		EnableWindow(GetDlgItem(m_hWnd, IDC_ACCURATE_BLEND_UNIT), hw);
 		EnableWindow(GetDlgItem(m_hWnd, IDC_ACCURATE_BLEND_UNIT_D3D11), hw);
 		EnableWindow(GetDlgItem(m_hWnd, IDC_ACCURATE_BLEND_UNIT_TEXT), hw);
-		ShowWindow(GetDlgItem(m_hWnd, IDC_ACCURATE_BLEND_UNIT), ogl ? SW_SHOW : SW_HIDE);
+		ShowWindow(GetDlgItem(m_hWnd, IDC_ACCURATE_BLEND_UNIT), null || ogl || vk ? SW_SHOW : SW_HIDE);
 		ShowWindow(GetDlgItem(m_hWnd, IDC_ACCURATE_BLEND_UNIT_D3D11), dx11 ? SW_SHOW : SW_HIDE);
-		ShowWindow(GetDlgItem(m_hWnd, IDC_ACCURATE_BLEND_UNIT_TEXT), !null ? SW_SHOW : SW_HIDE);
 
 		// Software mode settings
 		EnableWindow(GetDlgItem(m_hWnd, IDC_MIPMAP_SW), sw);

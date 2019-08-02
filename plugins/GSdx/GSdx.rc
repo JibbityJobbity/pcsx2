@@ -103,6 +103,8 @@ IDB_LOGO11              BITMAP                  "res\\logo11.bmp"
 
 IDB_LOGOGL              BITMAP                  "res\\logo-ogl.bmp"
 
+IDB_LOGOVK              BITMAP                  "res\\logo-vulkan.bmp"
+
 IDB_NULL                BITMAP                  "res\\logo-null.bmp"
 
 
@@ -284,6 +286,7 @@ BEGIN
     // General Settings:
     CONTROL         IDB_LOGO11,IDC_LOGO11,"Static",SS_BITMAP | SS_REALSIZECONTROL,6,6,230,44
     CONTROL         IDB_LOGOGL,IDC_LOGOGL,"Static",SS_BITMAP | SS_REALSIZECONTROL,6,6,230,44
+    CONTROL         IDB_LOGOVK,IDC_LOGOVK,"Static",SS_BITMAP | SS_REALSIZECONTROL,6,6,230,44
     CONTROL         IDB_NULL,IDC_NULL,"Static",SS_BITMAP | SS_REALSIZECONTROL,6,6,230,44
     LTEXT           "Renderer:",IDC_STATIC,6,57,79,8
     COMBOBOX        IDC_RENDERER,70,55,166,118,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
