@@ -208,9 +208,11 @@ void GSdxApp::Init()
 	m_gs_renderers.push_back(GSSetting(static_cast<uint32>(GSRendererType::DX1011_HW), "Direct3D 11", ""));
 	m_gs_renderers.push_back(GSSetting(static_cast<uint32>(GSRendererType::OGL_HW), "OpenGL", ""));
 	m_gs_renderers.push_back(GSSetting(static_cast<uint32>(GSRendererType::OGL_SW), "Software", ""));
+	m_gs_renderers.push_back(GSSetting(static_cast<uint32>(GSRendererType::VK_SW), "Vulkan", "Software"));
 #else // Linux
 	m_gs_renderers.push_back(GSSetting(static_cast<uint32>(GSRendererType::OGL_HW), "OpenGL", ""));
 	m_gs_renderers.push_back(GSSetting(static_cast<uint32>(GSRendererType::OGL_SW), "Software", ""));
+	m_gs_renderers.push_back(GSSetting(static_cast<uint32>(GSRendererType::VK_SW), "Vulkan", "Software"));
 #endif
 
 	// The null renderer goes third, it has use for benchmarking purposes in a release build

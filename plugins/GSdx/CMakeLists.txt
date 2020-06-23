@@ -104,6 +104,8 @@ set(GSdxSources
     Renderers/OpenGL/GSShaderOGL.cpp
     Renderers/OpenGL/GSTextureCacheOGL.cpp
     Renderers/OpenGL/GSTextureOGL.cpp
+    Renderers/Vulkan/GSDeviceVK.cpp
+    Renderers/Vulkan/GSTextureVK.cpp
     Window/GSSetting.cpp
     Window/GSWnd.cpp
     )
@@ -171,6 +173,8 @@ set(GSdxHeaders
     Renderers/OpenGL/GSTextureOGL.h
     Renderers/OpenGL/GSUniformBufferOGL.h
     Renderers/OpenGL/GSVertexArrayOGL.h
+    Renderers/Vulkan/GSDeviceVK.h
+    Renderers/Vulkan/GSTextureVK.h
     Window/GSCaptureDlg.h
     Window/GSDialog.h
     Window/GSSetting.h
@@ -195,6 +199,7 @@ if(Windows)
         Window/GSSettingsDlg.cpp
         Window/GSWndDX.cpp
         Window/GSWndWGL.cpp
+        Window/GSWndWVK.cpp
         )
 
     LIST(APPEND GSdxHeaders
@@ -204,6 +209,7 @@ if(Windows)
         Renderers/DX11/GSTextureCache11.h
         Window/GSWndDX.h
         Window/GSWndWGL.h
+        Window/GSWndWVK.h
         resource.h
         targetver.h
         )
@@ -211,10 +217,12 @@ else()
     LIST(APPEND GSdxSources
         Window/GSLinuxDialog.cpp
         Window/GSWndEGL.cpp
+        Window/GSWndXVK.cpp
         )
 
     LIST(APPEND GSdxHeaders
         Window/GSWndEGL.h
+        Window/GSWndXVK.h
         )
 endif()
 

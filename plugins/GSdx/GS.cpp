@@ -26,6 +26,7 @@
 #include "Renderers/Null/GSRendererNull.h"
 #include "Renderers/Null/GSDeviceNull.h"
 #include "Renderers/OpenGL/GSDeviceOGL.h"
+#include "Renderers/Vulkan/GSDeviceVK.h"
 #include "Renderers/OpenGL/GSRendererOGL.h"
 #include "GSLzma.h"
 
@@ -35,6 +36,7 @@
 #include "Renderers/DX11/GSDevice11.h"
 #include "Window/GSWndDX.h"
 #include "Window/GSWndWGL.h"
+#include "Window/GSWndWVK.h"
 #include "Window/GSSettingsDlg.h"
 
 static HRESULT s_hr = E_FAIL;
@@ -42,6 +44,7 @@ static HRESULT s_hr = E_FAIL;
 #else
 
 #include "Window/GSWndEGL.h"
+#include "Window/GSWndXVK.h"
 
 extern bool RunLinuxDialog();
 
@@ -248,13 +251,19 @@ static int _GSopen(void** dsp, const char* title, GSRendererType renderer, int t
 					wnds.push_back(std::make_shared<GSWndWGL>());
 #endif
 					break;
+				case GSRendererType::VK_SW:
+#ifdef __unix__
+					wnds.push_back(std::make_shared<GSWndXVK>());
+#else
+					wnds.push_back(std::make_shared<GSWndWVK>());
+#endif
+					break;
 				default:
 #ifdef _WIN32
 					wnds.push_back(std::make_shared<GSWndDX>());
 #else
 					wnds.push_back(std::make_shared<GSWndEGL_X11>());
 #endif
-					break;
 			}
 
 			int w = theApp.GetConfigI("ModeWidth");
@@ -328,6 +337,11 @@ static int _GSopen(void** dsp, const char* title, GSRendererType renderer, int t
 			s_renderer_name = "NULL";
 			renderer_name = "Null";
 			break;
+		case GSRendererType::VK_SW:
+			dev = new GSDeviceVK();
+			s_renderer_name = "SW";
+			renderer_name = "Software";
+			break;
 		}
 
 		printf("Current Renderer: %s\n", renderer_name.c_str());
@@ -351,6 +365,7 @@ static int _GSopen(void** dsp, const char* title, GSRendererType renderer, int t
 				s_gs = (GSRenderer*)new GSRendererOGL();
 				break;
 			case GSRendererType::OGL_SW:
+			case GSRendererType::VK_SW:
 				s_gs = new GSRendererSW(threads);
 				break;
 			case GSRendererType::Null:
