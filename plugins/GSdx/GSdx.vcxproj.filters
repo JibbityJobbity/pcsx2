@@ -543,6 +543,9 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\logo-vulkan.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
     <Image Include="res\logo-ogl.bmp">
       <Filter>Resource Files</Filter>
     </Image>

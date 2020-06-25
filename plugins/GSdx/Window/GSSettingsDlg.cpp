@@ -318,17 +318,16 @@ void GSSettingsDlg::UpdateControls()
 
 		const bool dx11 = renderer == GSRendererType::DX1011_HW;
 		const bool ogl = renderer == GSRendererType::OGL_HW || renderer == GSRendererType::OGL_SW;
+		const bool vk = /*renderer == GSRendererType::VK_HW || */renderer == GSRendererType::VK_SW;
 
-		const bool hw =  renderer == GSRendererType::DX1011_HW || renderer == GSRendererType::OGL_HW;
-		const bool sw =  renderer == GSRendererType::OGL_SW;
-		const bool null = renderer == GSRendererType::Null;
+		bool hw =  renderer == GSRendererType::DX1011_HW || renderer == GSRendererType::OGL_HW/* || renderer == GSRendererType::VK_HW*/;
+		bool sw =  renderer == GSRendererType::DX1011_SW || renderer == GSRendererType::OGL_SW || renderer == GSRendererType::VK_SW;
+		bool null = renderer == GSRendererType::Null;
 
-		const int sw_threads = SendMessage(GetDlgItem(m_hWnd, IDC_SWTHREADS), UDM_GETPOS, 0, 0);
-		SendMessage(GetDlgItem(m_hWnd, IDC_SWTHREADS), UDM_SETPOS, 0, MAKELPARAM(sw_threads, 0));
-
-		ShowWindow(GetDlgItem(m_hWnd, IDC_LOGO11), dx11 ? SW_SHOW : SW_HIDE);
 		ShowWindow(GetDlgItem(m_hWnd, IDC_NULL), null ? SW_SHOW : SW_HIDE);
+		ShowWindow(GetDlgItem(m_hWnd, IDC_LOGO11), dx11 ? SW_SHOW : SW_HIDE);
 		ShowWindow(GetDlgItem(m_hWnd, IDC_LOGOGL), ogl ? SW_SHOW : SW_HIDE);
+		ShowWindow(GetDlgItem(m_hWnd, IDC_LOGOVK), vk ? SW_SHOW : SW_HIDE);
 
 		EnableWindow(GetDlgItem(m_hWnd, IDC_INTERLACE), !null);
 		EnableWindow(GetDlgItem(m_hWnd, IDC_INTERLACE_TEXT), !null);
@@ -357,7 +356,7 @@ void GSSettingsDlg::UpdateControls()
 		EnableWindow(GetDlgItem(m_hWnd, IDC_ACCURATE_BLEND_UNIT), hw);
 		EnableWindow(GetDlgItem(m_hWnd, IDC_ACCURATE_BLEND_UNIT_D3D11), hw);
 		EnableWindow(GetDlgItem(m_hWnd, IDC_ACCURATE_BLEND_UNIT_TEXT), hw);
-		ShowWindow(GetDlgItem(m_hWnd, IDC_ACCURATE_BLEND_UNIT), ogl ? SW_SHOW : SW_HIDE);
+		ShowWindow(GetDlgItem(m_hWnd, IDC_ACCURATE_BLEND_UNIT), null || ogl || vk ? SW_SHOW : SW_HIDE);
 		ShowWindow(GetDlgItem(m_hWnd, IDC_ACCURATE_BLEND_UNIT_D3D11), dx11 || null ? SW_SHOW : SW_HIDE);
 
 		// Software mode settings

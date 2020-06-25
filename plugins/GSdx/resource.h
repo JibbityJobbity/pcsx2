@@ -10,16 +10,17 @@
 #define IDC_NULL                        2005
 #define IDC_LOGO11                      2006
 #define IDC_LOGOGL                      2007
-#define IDC_ADAPTER_TEXT                2008
-#define IDC_ADAPTER                     2009
-#define IDC_RENDERER                    2010
-#define IDC_FILTER_TEXT                 2011
-#define IDC_FILTER                      2012
-#define IDC_INTERLACE_TEXT              2013
-#define IDC_INTERLACE                   2014
-#define IDC_HACKSBUTTON                 2015
-#define IDC_OSDBUTTON                   2016
-#define IDC_SHADEBUTTON                 2017
+#define IDC_LOGOVK                      2008
+#define IDC_ADAPTER_TEXT                2009
+#define IDC_ADAPTER                     2010
+#define IDC_RENDERER                    2011
+#define IDC_FILTER_TEXT                 2012
+#define IDC_FILTER                      2013
+#define IDC_INTERLACE_TEXT              2014
+#define IDC_INTERLACE                   2015
+#define IDC_HACKSBUTTON                 2016
+#define IDC_OSDBUTTON                   2017
+#define IDC_SHADEBUTTON                 2018
 // Hardware Renderer Settings:
 #define IDC_PALTEX                      2030
 #define IDC_LARGE_FB                    2031

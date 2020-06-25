@@ -274,6 +274,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\logo-null.bmp" />
+    <Image Include="res\logo-vulkan.bmp" />
     <Image Include="res\logo-ogl.bmp" />
     <Image Include="res\logo11.bmp" />
   </ItemGroup>
