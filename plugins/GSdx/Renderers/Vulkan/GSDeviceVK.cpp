@@ -42,21 +42,21 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 	// Create instance
 	{
 		vk::ApplicationInfo appInfo(
-            "GSdx",
-            VK_MAKE_VERSION(0, 1, 0),
-            "GSdx",
-            VK_MAKE_VERSION(0, 1, 0),
-            VK_API_VERSION_1_1
-        );
+			"GSdx",
+			VK_MAKE_VERSION(0, 1, 0),
+			"GSdx",
+			VK_MAKE_VERSION(0, 1, 0),
+			VK_API_VERSION_1_1
+		);
 
 		vk::InstanceCreateInfo instanceCreateInfo(
-            {},
-            &appInfo,
-            0,
-            nullptr,
-            static_cast<uint32_t>(m_vk.instance_extensions.size()),
-            m_vk.instance_extensions.data()
-        );
+			{},
+			&appInfo,
+			0,
+			nullptr,
+			static_cast<uint32_t>(m_vk.instance_extensions.size()),
+			m_vk.instance_extensions.data()
+		);
 
 		try
 		{
@@ -70,6 +70,43 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 		}
 	}
 
+	// Create surface
+	{
+#ifdef VK_USE_PLATFORM_XLIB_KHR
+		vk::XlibSurfaceCreateInfoKHR createInfo(
+			{},
+			(Display*)m_wnd->GetDisplay(),
+			(Window)m_wnd->GetHandle()
+		);
+		try
+		{
+			m_vk.surface = m_vk.instance->createXlibSurfaceKHRUnique(createInfo);
+		}
+#elif defined(VK_USE_PLATFORM_WIN32_KHR)
+		vk::Win32SurfaceCreateInfoKHR createInfo(
+			{},
+			GetModuleHandle(nullptr),
+			(HWND)m_wnd->GetDisplay()
+		);
+		try
+		{
+			m_vk.surface = m_vk.instance->createWin32SurfaceKHRUnique(createInfo);
+		}
+#else
+#error Your platform is not supported
+#endif
+
+		catch (vk::SystemError ex)
+		{
+			fprintf(stderr, "VULKAN: Couldn't create a surface, reason is %s\n", ex.what());
+			return false;
+		}
+
+		m_vk.surface_format = {
+			vk::Format::eB8G8R8A8Unorm,
+			vk::ColorSpaceKHR::eSrgbNonlinear
+		};
+	}
 	return true;
 }
 

@@ -48,7 +48,13 @@ protected:
 			VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
 #endif
 		};
+		uint32_t graphics_queue_index = UINT32_MAX;
+		uint32_t compute_queue_index = UINT32_MAX;
+		uint32_t transfer_queue_index = UINT32_MAX;
+		uint32_t present_queue_index = UINT32_MAX;
 		vk::UniqueInstance instance;
+		vk::UniqueSurfaceKHR surface;
+		vk::SurfaceFormatKHR surface_format;
 	} m_vk;
 
 public:
