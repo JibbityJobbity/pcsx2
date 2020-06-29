@@ -48,6 +48,8 @@ protected:
 			VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
 #endif
 		};
+		const std::vector<const char*> device_extensions = {
+		};
 		uint32_t graphics_queue_index = UINT32_MAX;
 		uint32_t compute_queue_index = UINT32_MAX;
 		uint32_t transfer_queue_index = UINT32_MAX;
@@ -55,6 +57,12 @@ protected:
 		vk::UniqueInstance instance;
 		vk::UniqueSurfaceKHR surface;
 		vk::SurfaceFormatKHR surface_format;
+		vk::PhysicalDevice physical_dev;
+		vk::UniqueDevice device;
+		vk::Queue graphics_queue;
+		vk::Queue compute_queue;
+		vk::Queue transfer_queue;
+		vk::Queue present_queue;
 	} m_vk;
 
 public:

@@ -107,6 +107,76 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 			vk::ColorSpaceKHR::eSrgbNonlinear
 		};
 	}
+
+	// Create logical device
+	{
+		auto devs = m_vk.instance->enumeratePhysicalDevices();
+		if (devs.size() <= 0)
+		{
+			fprintf(stderr, "VULKAN: No physical devices supported");
+			return false;
+		}
+		m_vk.physical_dev = devs[0];
+
+		auto queueProperties = m_vk.physical_dev.getQueueFamilyProperties();
+		for (uint32_t i = 0; i < queueProperties.size(); i++)
+		{
+			if (queueProperties[i].queueFlags & vk::QueueFlagBits::eGraphics)
+				m_vk.graphics_queue_index = i;
+			if (queueProperties[i].queueFlags & vk::QueueFlagBits::eCompute)
+				m_vk.compute_queue_index = i;
+			if (queueProperties[i].queueFlags & vk::QueueFlagBits::eTransfer)
+				m_vk.transfer_queue_index = i;
+			if (m_vk.physical_dev.getSurfaceSupportKHR(i, *m_vk.surface) == VK_TRUE)
+				m_vk.present_queue_index = i;
+		}
+
+		float priority = 1.0f;
+		std::set<uint32_t> uniqueQueueIndices {
+			m_vk.graphics_queue_index,
+			m_vk.compute_queue_index,
+			m_vk.transfer_queue_index,
+			m_vk.present_queue_index
+		};
+		std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
+		queueCreateInfos.reserve(uniqueQueueIndices.size());
+		for (uint32_t i : uniqueQueueIndices) {
+			vk::DeviceQueueCreateInfo c(
+				{},
+				i,
+				1,
+				&priority
+			);
+			queueCreateInfos.push_back(c);
+		}
+
+		vk::PhysicalDeviceFeatures features = m_vk.physical_dev.getFeatures();
+		vk::DeviceCreateInfo createInfo(
+			{},
+			static_cast<uint32_t>(queueCreateInfos.size()),
+			queueCreateInfos.data(),
+			0,
+			nullptr,
+			static_cast<uint32_t>(m_vk.device_extensions.size()),
+			m_vk.device_extensions.data(),
+			&features
+		);
+
+		try 
+		{
+			m_vk.device = m_vk.physical_dev.createDeviceUnique(createInfo);
+			m_vk.graphics_queue = m_vk.device->getQueue(m_vk.graphics_queue_index, 0);
+			m_vk.compute_queue = m_vk.device->getQueue(m_vk.compute_queue_index, 0);
+			m_vk.transfer_queue = m_vk.device->getQueue(m_vk.transfer_queue_index, 0);
+			m_vk.present_queue = m_vk.device->getQueue(m_vk.present_queue_index, 0);
+		}
+		catch (vk::SystemError ex)
+		{
+			fprintf(stderr, "VULKAN: Couldn't create a device, reason is %s\n", ex.what());
+			return false;
+		}
+	}
+
 	return true;
 }
 
