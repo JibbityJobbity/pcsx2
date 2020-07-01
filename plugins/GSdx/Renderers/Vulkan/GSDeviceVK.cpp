@@ -177,11 +177,115 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 		}
 	}
 
+	// Create swapchain
+	try
+	{
+		createSwapChain();
+	}
+	catch (vk::SystemError ex)
+	{
+		fprintf(stderr, "VULKAN: Couldn't create the swapchain, reason is %s\n", ex.what());
+		return false;
+	}
+
 	return true;
+}
+
+void GSDeviceVK::createSwapChain()
+{
+	vk::SurfaceCapabilitiesKHR capabilities = m_vk.physical_dev.getSurfaceCapabilitiesKHR(*m_vk.surface);
+	auto presentModes = m_vk.physical_dev.getSurfacePresentModesKHR(*m_vk.surface);
+
+	vk::PresentModeKHR desiredPresentMode;
+	switch(m_vsync)
+	{
+		default:
+		case 0:
+			desiredPresentMode = vk::PresentModeKHR::eImmediate;
+			break;
+		case 1:
+			desiredPresentMode = vk::PresentModeKHR::eFifo;
+			break;
+		case -1:
+			desiredPresentMode = vk::PresentModeKHR::eFifoRelaxed;
+			break;
+	}
+
+	if (capabilities.currentExtent.width != UINT32_MAX)
+		m_vk.swap_extent = capabilities.currentExtent;
+	else
+	{
+		auto windowDims = m_wnd->GetClientRect();
+		m_vk.swap_extent = vk::Extent2D{static_cast<uint32_t>(windowDims.z), static_cast<uint32_t>(windowDims.w)};
+		m_vk.swap_extent.setWidth(std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, m_vk.swap_extent.width)));
+		m_vk.swap_extent.setHeight(std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, m_vk.swap_extent.height)));
+	}
+	
+	uint32_t imageCount = capabilities.minImageCount + 1;
+	if (capabilities.maxImageCount > 0)
+		imageCount = std::min(capabilities.maxImageCount, imageCount);
+
+	uint32_t indices[] = {
+		m_vk.graphics_queue_index,
+		m_vk.present_queue_index
+	};
+	auto sharingMode = m_vk.graphics_queue_index == m_vk.present_queue_index ?
+		vk::SharingMode::eExclusive : vk::SharingMode::eConcurrent;
+	vk::SwapchainCreateInfoKHR swapCreateInfo(
+		{},
+		*m_vk.surface,
+		imageCount,
+		m_vk.surface_format.format,
+		m_vk.surface_format.colorSpace,
+		m_vk.swap_extent,
+		1,
+		vk::ImageUsageFlagBits::eColorAttachment,
+		sharingMode,
+		2,
+		indices,
+		capabilities.currentTransform,
+		vk::CompositeAlphaFlagBitsKHR::eOpaque,
+		desiredPresentMode,
+		VK_TRUE,
+		*m_vk.swapchain
+	);
+
+	m_vk.swapchain = m_vk.device->createSwapchainKHRUnique(swapCreateInfo);
+	m_vk.swapchain_image_views.clear();
+	m_vk.swapchain_images = m_vk.device->getSwapchainImagesKHR(*m_vk.swapchain);
+	vk::ImageSubresourceRange isr(
+		vk::ImageAspectFlagBits::eColor,
+		0,
+		1,
+		0,
+		1
+	);
+
+	for (const auto& i : m_vk.swapchain_images)
+	{
+		vk::ImageViewCreateInfo imageViewCreateInfo(
+			{},
+			i,
+			vk::ImageViewType::e2D,
+			m_vk.surface_format.format,
+			{vk::ComponentSwizzle::eIdentity, vk::ComponentSwizzle::eIdentity, vk::ComponentSwizzle::eIdentity, vk::ComponentSwizzle::eIdentity},
+			isr
+		);
+		m_vk.swapchain_image_views.push_back(m_vk.device->createImageViewUnique(imageViewCreateInfo));
+	}
 }
 
 GSDeviceVK::~GSDeviceVK()
 {
+}
+
+void GSDeviceVK::SetVSync(int vsync)
+{
+	if (m_vsync != vsync)
+	{
+		m_vsync = vsync;
+		createSwapChain();
+	}
 }
 
 GSTexture* GSDeviceVK::CreateSurface(int type, int w, int h, int format)

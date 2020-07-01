@@ -49,6 +49,7 @@ protected:
 #endif
 		};
 		const std::vector<const char*> device_extensions = {
+			VK_KHR_SWAPCHAIN_EXTENSION_NAME
 		};
 		uint32_t graphics_queue_index = UINT32_MAX;
 		uint32_t compute_queue_index = UINT32_MAX;
@@ -63,12 +64,20 @@ protected:
 		vk::Queue compute_queue;
 		vk::Queue transfer_queue;
 		vk::Queue present_queue;
+		vk::UniqueSwapchainKHR swapchain;
+		std::vector<vk::Image> swapchain_images;
+		vk::Extent2D swap_extent;
+		vk::Format swap_image_format;
+		std::vector<vk::UniqueImageView> swapchain_image_views;
 	} m_vk;
+
+	void createSwapChain();
 
 public:
 	GSDeviceVK();
 	~GSDeviceVK();
 
+	void SetVSync(int vsync) override;
 	bool Create(const std::shared_ptr<GSWnd> &wnd);
 	bool Reset(int w, int h);
 }; 
