@@ -29,6 +29,41 @@
 
 VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
+VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
+	VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+	VkDebugUtilsMessageTypeFlagsEXT messageType,
+	const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+	void* pUserData)
+{
+	FILE* outStream;
+	const char* prefix;
+
+	if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT)
+	{
+		prefix = "VERBOSE: ";
+		outStream = stdout;
+	}
+	else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT)
+	{
+		prefix = "INFO: ";
+		outStream = stdout;
+	}
+	else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
+	{
+		prefix = "WARNING: ";
+		outStream = stderr;
+	}
+	else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+	{
+		prefix = "ERROR: ";
+		outStream = stderr;
+	}
+
+	fprintf(outStream, "VK%s[%d][%s] : %s\n", prefix, pCallbackData->messageIdNumber, pCallbackData->pMessageIdName, pCallbackData->pMessage);
+
+	return VK_FALSE;
+}
+
 GSDeviceVK::GSDeviceVK()
 {
 }
@@ -52,8 +87,8 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 		vk::InstanceCreateInfo instanceCreateInfo(
 			{},
 			&appInfo,
-			0,
-			nullptr,
+			static_cast<uint32_t>(m_vk.instance_layers.size()),
+			m_vk.instance_layers.data(),
 			static_cast<uint32_t>(m_vk.instance_extensions.size()),
 			m_vk.instance_extensions.data()
 		);
@@ -107,6 +142,33 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 			vk::ColorSpaceKHR::eSrgbNonlinear
 		};
 	}
+
+#ifndef NDEBUG
+	// Create debug messenger
+	{
+		auto severityFlags = vk::DebugUtilsMessageSeverityFlagBitsEXT::eError
+			| vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning
+			| vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose
+			| vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo;
+
+		auto typeFlags = vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral
+			| vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation
+			| vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance;
+
+		try
+		{
+			m_vk.debug_messenger = m_vk.instance->createDebugUtilsMessengerEXTUnique(
+				{{}, severityFlags, typeFlags, debugCallback},
+				nullptr
+			);
+		}
+		catch (vk::SystemError ex)
+		{
+			fprintf(stderr, "VULKAN: Couldn't create debug messenger, reason is %s\n", ex.what());
+		}
+
+	}
+#endif
 
 	// Create logical device
 	{

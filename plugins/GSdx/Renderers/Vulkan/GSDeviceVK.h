@@ -47,6 +47,14 @@ protected:
 #elif defined(VK_USE_PLATFORM_WIN32_KHR)
 			VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
 #endif
+#ifndef NDEBUG
+			VK_EXT_DEBUG_UTILS_EXTENSION_NAME,
+#endif
+		};
+		const std::vector<const char*> instance_layers = {
+#ifndef NDEBUG
+			"VK_LAYER_KHRONOS_validation",
+#endif
 		};
 		const std::vector<const char*> device_extensions = {
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME
@@ -59,6 +67,9 @@ protected:
 		vk::UniqueSurfaceKHR surface;
 		vk::SurfaceFormatKHR surface_format;
 		vk::PhysicalDevice physical_dev;
+#ifndef NDEBUG
+		vk::UniqueDebugUtilsMessengerEXT debug_messenger;
+#endif
 		vk::UniqueDevice device;
 		vk::Queue graphics_queue;
 		vk::Queue compute_queue;
