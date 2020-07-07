@@ -360,6 +360,7 @@ void GSDeviceVK::createSwapChain()
 		1
 	);
 
+	m_vk.framebuffers.clear();
 	for (const auto& i : m_vk.swapchain_images)
 	{
 		vk::ImageViewCreateInfo imageViewCreateInfo(
@@ -371,6 +372,17 @@ void GSDeviceVK::createSwapChain()
 			isr
 		);
 		m_vk.swapchain_image_views.push_back(m_vk.device->createImageViewUnique(imageViewCreateInfo));
+
+		vk::FramebufferCreateInfo framebufferInfo(
+			{},
+			*m_vk.render_pass,
+			1,
+			&*m_vk.swapchain_image_views.back(),
+			m_vk.swap_extent.width,
+			m_vk.swap_extent.height,
+			1
+		);
+		m_vk.framebuffers.push_back(m_vk.device->createFramebufferUnique(framebufferInfo));
 	}
 }
 

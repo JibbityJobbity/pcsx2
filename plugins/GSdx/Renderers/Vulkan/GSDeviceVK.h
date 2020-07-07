@@ -81,6 +81,7 @@ protected:
 		vk::Extent2D swap_extent;
 		vk::Format swap_image_format;
 		std::vector<vk::UniqueImageView> swapchain_image_views;
+		std::vector<vk::UniqueFramebuffer> framebuffers;
 	} m_vk;
 
 	void createSwapChain();
