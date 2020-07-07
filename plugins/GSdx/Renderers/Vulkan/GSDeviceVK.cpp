@@ -239,6 +239,43 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 		}
 	}
 
+	// Create render pass
+	{
+		vk::AttachmentDescription colorAttachment(
+			{},
+			m_vk.surface_format.format,
+			vk::SampleCountFlagBits::e1,
+			vk::AttachmentLoadOp::eClear,
+			vk::AttachmentStoreOp::eStore,
+			vk::AttachmentLoadOp::eDontCare,
+			vk::AttachmentStoreOp::eDontCare,
+			vk::ImageLayout::eUndefined,
+			vk::ImageLayout::ePresentSrcKHR
+		);
+		vk::AttachmentReference attachmentRef(
+			0,
+			vk::ImageLayout::eColorAttachmentOptimal
+		);
+		vk::SubpassDescription subpassDesc(
+			{},
+			vk::PipelineBindPoint::eGraphics,
+			0,
+			nullptr,
+			1,
+			&attachmentRef
+		);
+		vk::RenderPassCreateInfo renderPassInfo(
+			{},
+			1,
+			&colorAttachment,
+			1,
+			&subpassDesc,
+			0,
+			nullptr
+		);
+		m_vk.render_pass = m_vk.device->createRenderPassUnique(renderPassInfo);
+	}
+
 	// Create swapchain
 	try
 	{

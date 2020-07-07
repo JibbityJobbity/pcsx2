@@ -75,6 +75,7 @@ protected:
 		vk::Queue compute_queue;
 		vk::Queue transfer_queue;
 		vk::Queue present_queue;
+		vk::UniqueRenderPass render_pass;
 		vk::UniqueSwapchainKHR swapchain;
 		std::vector<vk::Image> swapchain_images;
 		vk::Extent2D swap_extent;
