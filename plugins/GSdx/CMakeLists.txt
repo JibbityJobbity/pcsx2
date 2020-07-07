@@ -105,6 +105,7 @@ set(GSdxSources
     Renderers/OpenGL/GSTextureCacheOGL.cpp
     Renderers/OpenGL/GSTextureOGL.cpp
     Renderers/Vulkan/GSDeviceVK.cpp
+    Renderers/Vulkan/GSPipelineVK.cpp
     Renderers/Vulkan/GSTextureVK.cpp
     Window/GSSetting.cpp
     Window/GSWnd.cpp
@@ -174,6 +175,7 @@ set(GSdxHeaders
     Renderers/OpenGL/GSUniformBufferOGL.h
     Renderers/OpenGL/GSVertexArrayOGL.h
     Renderers/Vulkan/GSDeviceVK.h
+    Renderers/Vulkan/GSPipelineVK.h
     Renderers/Vulkan/GSTextureVK.h
     Window/GSCaptureDlg.h
     Window/GSDialog.h
