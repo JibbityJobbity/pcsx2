@@ -94,6 +94,12 @@ bool GSdxApp::LoadResource(int id, std::vector<char>& buff, const char* type)
 		case IDR_FONT_ROBOTO:
 			path = "/GSdx/res/fonts-roboto/Roboto-Regular.ttf";
 			break;
+		case IDR_CONVERT_VS_SPV:
+			path = "/GSdx/res/spirv/convert_vs_main.spv";
+			break;
+		case IDR_CONVERT_PS0_SPV:
+			path = "/GSdx/res/spirv/convert_ps_main0.spv";
+			break;
 		default:
 			printf("LoadResource not implemented for id %d\n", id);
 			return false;

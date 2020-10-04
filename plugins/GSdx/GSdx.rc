@@ -93,6 +93,10 @@ IDR_TFX_FS_GLSL         RCDATA                  "res\\glsl\\tfx_fs.glsl";
 
 IDR_FONT_ROBOTO         RCDATA                  "res\\fonts-roboto\\Roboto-Regular.ttf";
 
+IDR_CONVERT_VS_SPV      RCDATA                  "res\\spirv\\convert_vs_main.spv";
+
+IDR_CONVERT_PS0_SPV     RCDATA                  "res\\spirv\\convert_ps_main0.spv";
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // Bitmap

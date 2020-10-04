@@ -26,6 +26,7 @@
 #endif
 
 #include "Renderers/Common/GSDevice.h"
+#include "GSPipelineVK.h"
 #define VULKAN_HPP_DISPATCH_LOADER_DYNAMIC 1
 #include "vulkan/vulkan.hpp"
 #include <vector>
@@ -83,6 +84,7 @@ protected:
 		std::vector<vk::UniqueImageView> swapchain_image_views;
 		std::vector<vk::UniqueFramebuffer> framebuffers;
 	} m_vk;
+	GSPipelineVK m_convert;
 
 	void createSwapChain();
 

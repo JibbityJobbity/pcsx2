@@ -30,4 +30,10 @@
     <gresource prefix="/GSdx/res/">
         <file>fonts-roboto/Roboto-Regular.ttf</file>
     </gresource>
+    <gresource prefix="/GSdx/res/">
+        <file>spirv/convert_vs_main.spv</file>
+    </gresource>
+    <gresource prefix="/GSdx/res/">
+        <file>spirv/convert_ps_main0.spv</file>
+    </gresource>
 </gresources>

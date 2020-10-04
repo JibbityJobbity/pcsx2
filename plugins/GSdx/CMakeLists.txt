@@ -255,6 +255,8 @@ set(RESOURCE_FILES
     res/fxaa.fx
     res/glsl/common_header.glsl
     res/glsl/convert.glsl
+    res/spirv/convert_vs_main.spv
+    res/spirv/convert_ps_main0.spv
     res/glsl/interlace.glsl
     res/glsl/merge.glsl
     res/glsl/shadeboost.glsl

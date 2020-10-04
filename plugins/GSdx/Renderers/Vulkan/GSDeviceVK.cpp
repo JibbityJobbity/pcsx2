@@ -27,6 +27,12 @@
 #include "Window/GSWndXVK.h"
 #endif
 
+#ifdef _WIN32
+#include "resource.h"
+#else
+#include "GSdxResources.h"
+#endif
+
 VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
 VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
@@ -286,6 +292,23 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 		fprintf(stderr, "VULKAN: Couldn't create the swapchain, reason is %s\n", ex.what());
 		return false;
 	}
+
+	m_convert = GSPipelineVK();
+	std::vector<GSInputAttributeVK> convertLayout = {
+		{ vk::Format::eR32G32Sfloat,  0  },
+		{ vk::Format::eR32G32Sfloat,  16 },
+		{ vk::Format::eR8G8B8A8Uint,  8  },
+		{ vk::Format::eR32Sfloat,     12 },
+		{ vk::Format::eR16G16Uint,    16 },
+		{ vk::Format::eR32Uint,       20 },
+		{ vk::Format::eR16G16Uint,    24 },
+		{ vk::Format::eR8G8B8A8Unorm, 28 }
+	};
+	m_convert.SetVertexAttributes(convertLayout, sizeof(GSVertex));
+	m_convert.SetDims(m_vk.swap_extent);
+	m_convert.AddShader(m_vk.device, IDR_CONVERT_PS0_SPV, vk::ShaderStageFlagBits::eFragment);
+	m_convert.AddShader(m_vk.device, IDR_CONVERT_VS_SPV, vk::ShaderStageFlagBits::eVertex);
+	m_convert.Initialize(m_vk.device, *m_vk.render_pass);
 
 	return true;
 }

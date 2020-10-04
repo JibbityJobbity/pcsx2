@@ -22,24 +22,27 @@
 
 #include <fstream>
 
-void GSPipelineVK::AddShader(vk::UniqueDevice& dev, std::string& name, vk::ShaderStageFlagBits& usage)
+#include "GSState.h"
+#ifdef _WIN32
+#include "resource.h"
+#else
+#include "GSdxResources.h"
+#endif
+
+void GSPipelineVK::AddShader(vk::UniqueDevice& dev, int id, vk::ShaderStageFlagBits usage)
 {
-	std::ifstream shaderFile;
-	shaderFile.open(name, std::ios::ate | std::fstream::binary);
-	size_t fileSize = (size_t)shaderFile.tellg();
-	std::vector<char> contents(fileSize);
-	shaderFile.seekg(0);
-	shaderFile.read(contents.data(), fileSize);
+	std::vector<char> contents;
+	theApp.LoadResource(id, contents);
 
 	vk::ShaderModuleCreateInfo createInfo(
 		{},
-		fileSize,
+		contents.size()-1,
 		reinterpret_cast<const uint32_t*>(contents.data())
 	);
 
 	VKModuleInfo moduleInfo{};
 	moduleInfo.module = dev->createShaderModuleUnique(createInfo);
-	moduleInfo.name = name;
+	moduleInfo.name = "main";
 	moduleInfo.stageType = usage;
 	m_modules.push_back(std::move(moduleInfo));
 }
@@ -51,8 +54,8 @@ void GSPipelineVK::SetVertexAttributes(std::vector<GSInputAttributeVK>& attribut
 	for (const auto& gsattr : attributes)
 	{
 		vk::VertexInputAttributeDescription attribute(
+			i++,
 			0,
-			i,
 			gsattr.format,
 			gsattr.offset
 		);

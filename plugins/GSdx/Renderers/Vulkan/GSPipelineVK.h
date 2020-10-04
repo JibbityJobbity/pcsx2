@@ -47,7 +47,7 @@ protected:
 	vk::Viewport m_viewport;
 	vk::Rect2D m_scissor;
 public:
-	void AddShader(vk::UniqueDevice& dev, std::string& name, vk::ShaderStageFlagBits& usage);
+	void AddShader(vk::UniqueDevice& dev, int id, vk::ShaderStageFlagBits usage);
 	void SetDims(vk::Extent2D& extent);
 	void SetVertexAttributes(std::vector<GSInputAttributeVK>& attributes, uint32_t vertexSize);
 	void Initialize(vk::UniqueDevice& dev, vk::RenderPass renderPass);
