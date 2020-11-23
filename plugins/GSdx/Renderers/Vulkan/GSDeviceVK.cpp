@@ -305,6 +305,13 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 		{ vk::Format::eR8G8B8A8Unorm, 28 }
 	};
 	m_convert.SetVertexAttributes(convertLayout, sizeof(GSVertex));
+	std::vector<vk::DescriptorSetLayoutBinding> convertDescriptorBindings = {
+		{ 0, vk::DescriptorType::eCombinedImageSampler, 1, vk::ShaderStageFlagBits::eFragment },
+		{ 15, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eFragment },
+		{ 20, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eGeometry },
+		{ 21, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment }
+	};
+	m_convert.SetDescriptorSetLayoutBindings(convertDescriptorBindings);
 	m_convert.SetDims(m_vk.swap_extent);
 	m_convert.AddShader(m_vk.device, IDR_CONVERT_PS0_SPV, vk::ShaderStageFlagBits::eFragment);
 	m_convert.AddShader(m_vk.device, IDR_CONVERT_VS_SPV, vk::ShaderStageFlagBits::eVertex);

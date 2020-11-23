@@ -42,6 +42,8 @@ protected:
 	std::vector<VKModuleInfo> m_modules;
 	std::vector<vk::VertexInputAttributeDescription> m_vertex_attributes;
 	uint32_t m_vertex_size;
+	std::vector<vk::DescriptorSetLayoutBinding> m_descriptor_bindings;
+	vk::UniqueDescriptorSetLayout m_descriptor_set_layout;
 	vk::UniquePipelineLayout m_layout;
 	vk::UniquePipeline m_pipeline;
 	vk::Viewport m_viewport;
@@ -50,6 +52,7 @@ public:
 	void AddShader(vk::UniqueDevice& dev, int id, vk::ShaderStageFlagBits usage);
 	void SetDims(vk::Extent2D& extent);
 	void SetVertexAttributes(std::vector<GSInputAttributeVK>& attributes, uint32_t vertexSize);
+	void SetDescriptorSetLayoutBindings(std::vector<vk::DescriptorSetLayoutBinding>& bindings);
 	void Initialize(vk::UniqueDevice& dev, vk::RenderPass renderPass);
 	void Bind(vk::UniqueCommandBuffer& commandBuffer, vk::PipelineBindPoint& bindPoint);
 };

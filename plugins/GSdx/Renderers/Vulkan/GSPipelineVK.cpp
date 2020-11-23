@@ -64,6 +64,10 @@ void GSPipelineVK::SetVertexAttributes(std::vector<GSInputAttributeVK>& attribut
 	m_vertex_size = vertexSize;
 }
 
+void GSPipelineVK::SetDescriptorSetLayoutBindings(std::vector<vk::DescriptorSetLayoutBinding>& bindings) {
+	m_descriptor_bindings = bindings;
+}
+
 void GSPipelineVK::SetDims(vk::Extent2D& extent)
 {
 	m_viewport.setWidth(extent.width);
@@ -146,7 +150,17 @@ void GSPipelineVK::Initialize(vk::UniqueDevice& dev, vk::RenderPass renderPass)
 		&blendAttachmentState
 	); // NOTE blending disabled
 
-	vk::PipelineLayoutCreateInfo layoutInfo; // TODO needs to be set at some stage
+	vk::DescriptorSetLayoutCreateInfo descriptorLayoutInfo(
+		{},
+		m_descriptor_bindings.size(),
+		m_descriptor_bindings.data()
+	);
+	m_descriptor_set_layout = dev->createDescriptorSetLayoutUnique(descriptorLayoutInfo);
+	vk::PipelineLayoutCreateInfo layoutInfo(
+		{},
+		1,
+		&*m_descriptor_set_layout
+	);
 	m_layout = dev->createPipelineLayoutUnique(layoutInfo);
 
 	vk::GraphicsPipelineCreateInfo pipelineInfo(
