@@ -29,7 +29,9 @@
 #include "GSdxResources.h"
 #endif
 
-void GSPipelineVK::AddShader(vk::UniqueDevice& dev, int id, vk::ShaderStageFlagBits usage)
+GSPipelineVK::GSPipelineVK(vk::Device dev) : m_dev(dev) {}
+
+void GSPipelineVK::AddShader(int id, vk::ShaderStageFlagBits usage)
 {
 	std::vector<char> contents;
 	theApp.LoadResource(id, contents);
@@ -41,7 +43,7 @@ void GSPipelineVK::AddShader(vk::UniqueDevice& dev, int id, vk::ShaderStageFlagB
 	);
 
 	VKModuleInfo moduleInfo{};
-	moduleInfo.module = dev->createShaderModuleUnique(createInfo);
+	moduleInfo.module = m_dev.createShaderModuleUnique(createInfo);
 	moduleInfo.name = "main";
 	moduleInfo.stageType = usage;
 	m_modules.push_back(std::move(moduleInfo));
@@ -65,7 +67,18 @@ void GSPipelineVK::SetVertexAttributes(std::vector<GSInputAttributeVK>& attribut
 }
 
 void GSPipelineVK::SetDescriptorSetLayoutBindings(std::vector<vk::DescriptorSetLayoutBinding>& bindings) {
-	m_descriptor_bindings = bindings;
+	vk::DescriptorSetLayoutCreateInfo descriptorLayoutInfo(
+		{},
+		bindings.size(),
+		bindings.data()
+	);
+	m_descriptor_set_layout = m_dev.createDescriptorSetLayoutUnique(descriptorLayoutInfo);
+	vk::PipelineLayoutCreateInfo layoutInfo(
+		{},
+		1,
+		&*m_descriptor_set_layout
+	);
+	m_layout = m_dev.createPipelineLayoutUnique(layoutInfo);
 }
 
 void GSPipelineVK::SetDims(vk::Extent2D& extent)
@@ -76,7 +89,7 @@ void GSPipelineVK::SetDims(vk::Extent2D& extent)
 	m_scissor.setOffset({0, 0});
 }
 
-void GSPipelineVK::Initialize(vk::UniqueDevice& dev, vk::RenderPass renderPass)
+void GSPipelineVK::Initialize(vk::RenderPass renderPass)
 {
 	std::vector<vk::PipelineShaderStageCreateInfo> shaderStageInfos;
 	for (auto& m : m_modules)
@@ -150,19 +163,6 @@ void GSPipelineVK::Initialize(vk::UniqueDevice& dev, vk::RenderPass renderPass)
 		&blendAttachmentState
 	); // NOTE blending disabled
 
-	vk::DescriptorSetLayoutCreateInfo descriptorLayoutInfo(
-		{},
-		m_descriptor_bindings.size(),
-		m_descriptor_bindings.data()
-	);
-	m_descriptor_set_layout = dev->createDescriptorSetLayoutUnique(descriptorLayoutInfo);
-	vk::PipelineLayoutCreateInfo layoutInfo(
-		{},
-		1,
-		&*m_descriptor_set_layout
-	);
-	m_layout = dev->createPipelineLayoutUnique(layoutInfo);
-
 	vk::GraphicsPipelineCreateInfo pipelineInfo(
 		{},
 		shaderStageInfos.size(),
@@ -182,10 +182,10 @@ void GSPipelineVK::Initialize(vk::UniqueDevice& dev, vk::RenderPass renderPass)
 		nullptr,
 		-1
 	);
-	m_pipeline = dev->createGraphicsPipelineUnique(nullptr, pipelineInfo);
+	m_pipeline = m_dev.createGraphicsPipelineUnique(nullptr, pipelineInfo);
 }
 
-void GSPipelineVK::Bind(vk::UniqueCommandBuffer& commandBuffer, vk::PipelineBindPoint& bindPoint)
+void GSPipelineVK::Bind(vk::CommandBuffer commandBuffer, vk::PipelineBindPoint& bindPoint)
 {
-	commandBuffer->bindPipeline(bindPoint, *m_pipeline);
+	commandBuffer.bindPipeline(bindPoint, *m_pipeline);
 }

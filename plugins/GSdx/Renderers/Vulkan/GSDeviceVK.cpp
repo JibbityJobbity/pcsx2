@@ -70,7 +70,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 	return VK_FALSE;
 }
 
-GSDeviceVK::GSDeviceVK()
+GSDeviceVK::GSDeviceVK() : m_convert(GSPipelineVK(nullptr))
 {
 }
 
@@ -293,7 +293,7 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 		return false;
 	}
 
-	m_convert = GSPipelineVK();
+	m_convert = GSPipelineVK(*m_vk.device);
 	std::vector<GSInputAttributeVK> convertLayout = {
 		{ vk::Format::eR32G32Sfloat,  0  },
 		{ vk::Format::eR32G32Sfloat,  16 },
@@ -313,9 +313,9 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 	};
 	m_convert.SetDescriptorSetLayoutBindings(convertDescriptorBindings);
 	m_convert.SetDims(m_vk.swap_extent);
-	m_convert.AddShader(m_vk.device, IDR_CONVERT_PS0_SPV, vk::ShaderStageFlagBits::eFragment);
-	m_convert.AddShader(m_vk.device, IDR_CONVERT_VS_SPV, vk::ShaderStageFlagBits::eVertex);
-	m_convert.Initialize(m_vk.device, *m_vk.render_pass);
+	m_convert.AddShader(IDR_CONVERT_PS0_SPV, vk::ShaderStageFlagBits::eFragment);
+	m_convert.AddShader(IDR_CONVERT_VS_SPV, vk::ShaderStageFlagBits::eVertex);
+	m_convert.Initialize(*m_vk.render_pass);
 
 	return true;
 }
