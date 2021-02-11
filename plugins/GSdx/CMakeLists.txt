@@ -177,6 +177,8 @@ set(GSdxHeaders
     Renderers/Vulkan/GSDeviceVK.h
     Renderers/Vulkan/GSPipelineVK.h
     Renderers/Vulkan/GSTextureVK.h
+    Renderers/Vulkan/vk_mem_alloc.hpp
+    Renderers/Vulkan/vk_mem_alloc.h
     Window/GSCaptureDlg.h
     Window/GSDialog.h
     Window/GSSetting.h

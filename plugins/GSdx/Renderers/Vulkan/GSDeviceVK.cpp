@@ -18,6 +18,8 @@
  *
  */
 
+#define VMA_IMPLEMENTATION
+
 #include "stdafx.h"
 #include "GSDeviceVK.h"
 #include "GSTextureVK.h"
@@ -104,7 +106,7 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 			m_vk.instance = vk::createInstanceUnique(instanceCreateInfo);
 			VULKAN_HPP_DEFAULT_DISPATCHER.init(*m_vk.instance);
 		}
-		catch (vk::SystemError ex)
+		catch (const vk::SystemError& ex)
 		{
 			fprintf(stderr, "VULKAN: Couldn't create an instance, reason is %s\n", ex.what());
 			return false;
@@ -137,7 +139,7 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 #error Your platform is not supported
 #endif
 
-		catch (vk::SystemError ex)
+		catch (const vk::SystemError& ex)
 		{
 			fprintf(stderr, "VULKAN: Couldn't create a surface, reason is %s\n", ex.what());
 			return false;
@@ -168,7 +170,7 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 				nullptr
 			);
 		}
-		catch (vk::SystemError ex)
+		catch (const vk::SystemError& ex)
 		{
 			fprintf(stderr, "VULKAN: Couldn't create debug messenger, reason is %s\n", ex.what());
 		}
@@ -237,12 +239,55 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 			m_vk.compute_queue = m_vk.device->getQueue(m_vk.compute_queue_index, 0);
 			m_vk.transfer_queue = m_vk.device->getQueue(m_vk.transfer_queue_index, 0);
 			m_vk.present_queue = m_vk.device->getQueue(m_vk.present_queue_index, 0);
+
+			//VULKAN_HPP_DEFAULT_DISPATCHER.init(*m_vk.device);
 		}
-		catch (vk::SystemError ex)
+		catch (const vk::SystemError& ex)
 		{
 			fprintf(stderr, "VULKAN: Couldn't create a device, reason is %s\n", ex.what());
 			return false;
 		}
+	}
+
+	// Create memory allocator
+	{
+		vma::VulkanFunctions vulkanFunctions;
+		vulkanFunctions.vkGetPhysicalDeviceProperties = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetPhysicalDeviceProperties;
+		vulkanFunctions.vkGetPhysicalDeviceMemoryProperties = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetPhysicalDeviceMemoryProperties;
+		vulkanFunctions.vkAllocateMemory = VULKAN_HPP_DEFAULT_DISPATCHER.vkAllocateMemory;
+		vulkanFunctions.vkFreeMemory = VULKAN_HPP_DEFAULT_DISPATCHER.vkFreeMemory;
+		vulkanFunctions.vkMapMemory = VULKAN_HPP_DEFAULT_DISPATCHER.vkMapMemory;
+		vulkanFunctions.vkUnmapMemory = VULKAN_HPP_DEFAULT_DISPATCHER.vkUnmapMemory;
+		vulkanFunctions.vkFlushMappedMemoryRanges = VULKAN_HPP_DEFAULT_DISPATCHER.vkFlushMappedMemoryRanges;
+		vulkanFunctions.vkInvalidateMappedMemoryRanges = VULKAN_HPP_DEFAULT_DISPATCHER.vkInvalidateMappedMemoryRanges;
+		vulkanFunctions.vkBindBufferMemory = VULKAN_HPP_DEFAULT_DISPATCHER.vkBindBufferMemory;
+		vulkanFunctions.vkBindImageMemory = VULKAN_HPP_DEFAULT_DISPATCHER.vkBindImageMemory;
+		vulkanFunctions.vkGetBufferMemoryRequirements = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetBufferMemoryRequirements;
+		vulkanFunctions.vkGetImageMemoryRequirements = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetImageMemoryRequirements;
+		vulkanFunctions.vkCreateBuffer = VULKAN_HPP_DEFAULT_DISPATCHER.vkCreateBuffer;
+		vulkanFunctions.vkDestroyBuffer = VULKAN_HPP_DEFAULT_DISPATCHER.vkDestroyBuffer;
+		vulkanFunctions.vkCreateImage = VULKAN_HPP_DEFAULT_DISPATCHER.vkCreateImage;
+		vulkanFunctions.vkDestroyImage = VULKAN_HPP_DEFAULT_DISPATCHER.vkDestroyImage;
+		vulkanFunctions.vkCmdCopyBuffer = VULKAN_HPP_DEFAULT_DISPATCHER.vkCmdCopyBuffer;
+#if VMA_DEDICATED_ALLOCATION || VMA_VULKAN_VERSION >= 1001000
+		vulkanFunctions.vkGetBufferMemoryRequirements2KHR = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetBufferMemoryRequirements2;
+		vulkanFunctions.vkGetImageMemoryRequirements2KHR = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetImageMemoryRequirements2KHR;
+#endif
+#if VMA_BIND_MEMORY2 || VMA_VULKAN_VERSION >= 1001000
+		vulkanFunctions.vkBindBufferMemory2KHR = VULKAN_HPP_DEFAULT_DISPATCHER.vkBindBufferMemory2KHR;
+		vulkanFunctions.vkBindImageMemory2KHR = VULKAN_HPP_DEFAULT_DISPATCHER.vkBindImageMemory2KHR;
+#endif
+#if VMA_MEMORY_BUDGET || VMA_VULKAN_VERSION >= 1001000
+		vulkanFunctions.vkGetPhysicalDeviceMemoryProperties2KHR = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetPhysicalDeviceMemoryProperties2KHR;
+#endif
+
+		vma::AllocatorCreateInfo createInfo;
+		createInfo.vulkanApiVersion = VK_API_VERSION_1_1;
+		createInfo.physicalDevice = m_vk.physical_dev;
+		createInfo.device = *m_vk.device;
+		createInfo.instance = *m_vk.instance;
+		createInfo.pVulkanFunctions = &vulkanFunctions;
+		vma::createAllocator(&createInfo, &m_vk.allocator);
 	}
 
 	// Create render pass
@@ -287,7 +332,7 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 	{
 		createSwapChain();
 	}
-	catch (vk::SystemError ex)
+	catch (const vk::SystemError& ex)
 	{
 		fprintf(stderr, "VULKAN: Couldn't create the swapchain, reason is %s\n", ex.what());
 		return false;
@@ -418,6 +463,7 @@ void GSDeviceVK::createSwapChain()
 
 GSDeviceVK::~GSDeviceVK()
 {
+	m_vk.allocator.destroy();
 }
 
 void GSDeviceVK::SetVSync(int vsync)

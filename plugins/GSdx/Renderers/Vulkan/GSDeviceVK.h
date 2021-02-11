@@ -28,7 +28,9 @@
 #include "Renderers/Common/GSDevice.h"
 #include "GSPipelineVK.h"
 #define VULKAN_HPP_DISPATCH_LOADER_DYNAMIC 1
-#include "vulkan/vulkan.hpp"
+#define VMA_STATIC_VULKAN_FUNCTIONS 0
+#define VMA_DYNAMIC_VULKAN_FUNCTIONS 1
+#include "vk_mem_alloc.hpp"
 #include <vector>
 
 class GSDeviceVK : public GSDevice {
@@ -43,6 +45,7 @@ protected:
 	struct {
 		const std::vector<const char*> instance_extensions = {
 			VK_KHR_SURFACE_EXTENSION_NAME,
+			VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME,
 #ifdef VK_USE_PLATFORM_XLIB_KHR
 			VK_KHR_XLIB_SURFACE_EXTENSION_NAME,
 #elif defined(VK_USE_PLATFORM_WIN32_KHR)
@@ -58,7 +61,8 @@ protected:
 #endif
 		};
 		const std::vector<const char*> device_extensions = {
-			VK_KHR_SWAPCHAIN_EXTENSION_NAME
+			VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+			VK_EXT_MEMORY_BUDGET_EXTENSION_NAME,
 		};
 		uint32_t graphics_queue_index = UINT32_MAX;
 		uint32_t compute_queue_index = UINT32_MAX;
@@ -83,6 +87,7 @@ protected:
 		vk::Format swap_image_format;
 		std::vector<vk::UniqueImageView> swapchain_image_views;
 		std::vector<vk::UniqueFramebuffer> framebuffers;
+		vma::Allocator allocator;
 	} m_vk;
 	GSPipelineVK m_convert;
 
