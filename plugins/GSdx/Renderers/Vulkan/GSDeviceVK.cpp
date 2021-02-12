@@ -232,7 +232,7 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 			&features
 		);
 
-		try 
+		try
 		{
 			m_vk.device = m_vk.physical_dev.createDeviceUnique(createInfo);
 			m_vk.graphics_queue = m_vk.device->getQueue(m_vk.graphics_queue_index, 0);
@@ -361,6 +361,36 @@ bool GSDeviceVK::Create(const std::shared_ptr<GSWnd> &wnd)
 	m_convert.AddShader(IDR_CONVERT_PS0_SPV, vk::ShaderStageFlagBits::eFragment);
 	m_convert.AddShader(IDR_CONVERT_VS_SPV, vk::ShaderStageFlagBits::eVertex);
 	m_convert.Initialize(*m_vk.render_pass);
+
+	// Create command pool/buffers
+	{
+		vk::CommandPoolCreateInfo createInfo(
+			{},
+			m_vk.graphics_queue_index
+		);
+		try {
+			m_vk.command_pool = m_vk.device->createCommandPoolUnique(createInfo);
+		}
+		catch (const vk::SystemError& ex) {
+			fprintf(stderr, "VULKAN: Couldn't create command pool, reason is %s\n", ex.what());
+			return false;
+		}
+
+		vk::CommandBufferAllocateInfo allocInfo(
+			*m_vk.command_pool,
+			vk::CommandBufferLevel::ePrimary,
+			m_vk.framebuffers.size()
+		);
+		try
+		{
+			m_vk.draw_command_buffers = m_vk.device->allocateCommandBuffersUnique(allocInfo);
+		}
+		catch (const vk::SystemError& ex)
+		{
+			fprintf(stderr, "VULKAN: Couldn't allocate command buffers, reason is %s\n", ex.what());
+			return false;
+		}
+	}
 
 	return true;
 }

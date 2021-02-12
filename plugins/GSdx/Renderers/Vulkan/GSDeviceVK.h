@@ -88,6 +88,8 @@ protected:
 		std::vector<vk::UniqueImageView> swapchain_image_views;
 		std::vector<vk::UniqueFramebuffer> framebuffers;
 		vma::Allocator allocator;
+		vk::UniqueCommandPool command_pool;
+		std::vector<vk::UniqueCommandBuffer> draw_command_buffers;
 	} m_vk;
 	GSPipelineVK m_convert;
 
